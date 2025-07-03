@@ -36,7 +36,7 @@ pytest db-compare.py --verbose
 ### Run it with html result
 
 ```bash
-pytest db-compare.py --html db-compare.html
+pytest db-compare.py --html ./report/db-compare.html
 ```
 
 ### Run it with junit result
@@ -47,5 +47,5 @@ pytest db-compare.py --junitxml=./junitresult/db-compare.xml
 
 format it to an HTML page
 ```bash
-docker run --rm -v ./junitresult:/results maxmiorim/junit-viewer > results.html
+docker run --rm -v ./junitresult:/results maxmiorim/junit-viewer > ./report/junit-db-compare.html
 ```
