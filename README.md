@@ -1,5 +1,9 @@
 # Test Hive Metastore Backup & Restore
 
+The following scenario will be tested by going through the steps documented below
+
+![](./images/scenario.png)
+
 ## Preparation of environment
 
 ```bash
