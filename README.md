@@ -11,16 +11,17 @@ docker volume prune -f
 
 rm -R container-volume/minio/*
 docker compose up -d
+```
 
+wait until Minio is available
+
+```bash
 docker exec -ti minio-mc mc rb minio-1/flight-bucket --force
 
 docker exec -ti minio-mc mc mb minio-1/flight-bucket
 docker exec -ti minio-mc mc version enable minio-1/flight-bucket
-```
 
-verify that versioning works
-
-```bash
+# verify that versioning works
 docker exec -ti minio-mc mc version info minio-1/flight-bucket
 ```
 
@@ -34,6 +35,18 @@ docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 -
 
 ```bash
 docker exec -ti hive-metastore hive
+```
+
+you need to connect to `hive-server` if on **Hive Metastore 4.0.1**
+
+```
+!connect jdbc:hive2://hive-server:10000
+```
+
+or through hive-server if on **Hive Metastore 4.0.1**
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000
 ```
 
 ```sql
@@ -73,8 +86,6 @@ TBLPROPERTIES (
   "skip.header.line.count" = "1"
 );
 
-SELECT * FROM airport_t LIMIT 5;
-
 CREATE EXTERNAL TABLE flights_t ( dayOfMonth integer
                              , dayOfWeek integer
                              , depTime integer
@@ -96,11 +107,8 @@ PARTITIONED BY (year integer, month integer)
 STORED AS parquet
 LOCATION 's3a://flight-bucket/refined/flights';
 
-SELECT * FROM flights_t LIMIT 10;
-
-exit;
+!quit;
 ```
-
 
 **Check the HMS Notification Log**
 
@@ -126,6 +134,8 @@ docker exec -ti minio-mc mc cp /data-transfer/airport-data/airports-1.csv minio-
 docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=1 minio-1/flight-bucket/refined/flights/year=2008/
 ```
 
+* Execute this if **using Hive Metastore < 4.0.1**
+
 ```bash
 docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
 ```
@@ -142,6 +152,13 @@ OK
 Partitions not in metastore:	flights_t:year=2008/month=1
 Repair: Added partition to metastore flights_t:year=2008/month=1
 Time taken: 3.043 seconds, Fetched: 2 row(s)
+```
+
+
+* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
 ```
 
 **Check the HMS Notification Log**
@@ -172,17 +189,13 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 
 returns `605765`
 
-**Backup Minio (no longer needed)**
+**Backup Minio**
 
 ```bash
 cp -R container-volume/minio/ backup/1
 ```
 
 ## Handle period 2
-
-```bash
-touch backup/minio-savepoint-1
-```
 
 **Backup Hive Metastore (A)**
 
@@ -198,6 +211,8 @@ docker exec -ti minio-mc mc cp /data-transfer/airport-data/airports-2.csv minio-
 ```bash
 docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=2 minio-1/flight-bucket/refined/flights/year=2008/
 ```
+
+* Execute this if **using Hive Metastore < 4.0.1**
 
 ```bash
 docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
@@ -218,6 +233,12 @@ OK
 Partitions not in metastore:	flights_t:year=2008/month=2
 Repair: Added partition to metastore flights_t:year=2008/month=2
 Time taken: 2.943 seconds, Fetched: 2 row(s)
+```
+
+* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
 ```
 
 **Check the HMS Notification Log**
@@ -255,6 +276,18 @@ returns `1175001`
 docker exec -ti hive-metastore hive
 ```
 
+you need to connect to `hive-server` if on **Hive Metastore 4.0.1**
+
+```
+!connect jdbc:hive2://hive-server:10000
+```
+
+or through hive-server if on **Hive Metastore 4.0.1**
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000
+```
+
 ```sql
 use flight_db;
 
@@ -265,12 +298,11 @@ CREATE EXTERNAL TABLE flights_per_carrier_t (
 STORED AS PARQUET
 LOCATION 's3a://flight-bucket/refined/flights-per-carrier';
 
-INSERT INTO flights_per_carrier_t
-SELECT uniquecarrier, COUNT(*) AS flight_count
-FROM flight_db.flights_t
-GROUP BY uniquecarrier;
+!quit;
+```
 
-exit;
+```sql
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "INSERT INTO minio.flight_db.flights_per_carrier_t SELECT uniquecarrier, COUNT(*) AS flight_count FROM minio.flight_db.flights_t GROUP BY uniquecarrier" 
 ```
 
 **Check with Trino** 
@@ -296,10 +328,9 @@ guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --se
 "5","5","ADD_PARTITION","2025-06-26 09:54:43.000 UTC"
 "6","6","CREATE_TABLE","2025-06-26 09:55:42.000 UTC"
 "7","7","ALTER_TABLE","2025-06-26 09:55:53.000 UTC"
-"8","8","ALTER_TABLE","2025-06-26 09:55:54.000 UTC"
 ```
 
-**Backup Minio (no longer needed)**
+**Backup Minio**
 
 ```bash
 cp -R container-volume/minio/ backup/2
@@ -307,18 +338,22 @@ cp -R container-volume/minio/ backup/2
 
 ## Handle period 3
 
-```bash
-touch backup/minio-savepoint-2
-```
-
 **Upload `flights`**
 
 ```bash
 docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=3 minio-1/flight-bucket/refined/flights/year=2008/
 ```
 
+* Execute this if **using Hive Metastore < 4.0.1**
+
 ```bash
 docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
+```
+
+* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
 ```
 
 **Backup Hive Metastore (B)**
@@ -366,8 +401,7 @@ guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --se
 "5","5","ADD_PARTITION","2025-06-26 09:54:43.000 UTC"
 "6","6","CREATE_TABLE","2025-06-26 09:55:42.000 UTC"
 "7","7","ALTER_TABLE","2025-06-26 09:55:53.000 UTC"
-"8","8","ALTER_TABLE","2025-06-26 09:55:54.000 UTC"
-"9","9","ADD_PARTITION","2025-06-26 09:57:13.000 UTC"
+"8","8","ADD_PARTITION","2025-06-26 09:57:13.000 UTC"
 ```
 
 **Check with Trino**
@@ -384,17 +418,13 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 
 returns `1791091`
 
-**Backup Minio (no longer needed)**
+**Backup Minio**
 
 ```bash
 cp -R container-volume/minio/ backup/3
 ```
 
 ## Handle period 4
-
-```bash
-touch backup/minio-savepoint-3
-```
 
 **Backup Hive Metastore (C)**
 
@@ -413,10 +443,11 @@ List the versions of an object
 docker exec -ti minio-mc mc ls --versions minio-1/flight-bucket/raw/airports/airports.csv
 ```
 
-
 ```bash
 docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=4 minio-1/flight-bucket/refined/flights/year=2008/
 ```
+
+* Execute this if **using Hive Metastore < 4.0.1**
 
 ```bash
 docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
@@ -439,6 +470,12 @@ Repair: Added partition to metastore flights_t:year=2008/month=4
 Time taken: 2.969 seconds, Fetched: 2 row(s)
 ```
 
+* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
 **Check the HMS Notification Log**
 
 ```bash
@@ -455,9 +492,8 @@ guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --se
 "5","5","ADD_PARTITION","2025-06-26 15:21:57.000 UTC"
 "6","6","CREATE_TABLE","2025-06-26 15:23:06.000 UTC"
 "7","7","ALTER_TABLE","2025-06-26 15:23:17.000 UTC"
-"8","8","ALTER_TABLE","2025-06-26 15:23:19.000 UTC"
-"9","9","ADD_PARTITION","2025-06-26 15:25:07.000 UTC"
-"10","10","ADD_PARTITION","2025-06-26 15:31:19.000 UTC"
+"8","8","ADD_PARTITION","2025-06-26 15:25:07.000 UTC"
+"9","9","ADD_PARTITION","2025-06-26 15:31:19.000 UTC"
 ```
 
 **Check with Trino**
@@ -474,17 +510,13 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 
 returns `2389217`
 
-**Backup Minio & Hive Metastore (no longer needed)**
+**Backup Minio & Hive Metastore**
 
 ```bash
 cp -R container-volume/minio/ backup/4
 ```
 
 ## Handle Period 5
-
-```bash
-touch backup/minio-savepoint-4
-```
 
 **Backup Hive Metastore (C)**
 
@@ -506,17 +538,6 @@ cp -R backup/2/* container-volume/minio
 
 docker compose up -d
 ```
-
-Calcuate of how much to rollback to
-
-```bash
-set file ./backup/minio-savepoint-2
-set file_time (stat -f %m $file)
-set now_time (date +%s)
-set duration (math $now_time - $file_time)
-
-echo "rollback to $duration seconds back"
-```                                       
 
 List the versions of an object
 
@@ -562,6 +583,8 @@ minio-1/flight-bucket/refined/flights
       └─ part-00009-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
 ```
 
+* if on **Hive Metastore < 4.0.1**
+
 ```bash
 docker exec -ti hive-metastore hive -e 'SHOW PARTITIONS flight_db.flights_t;'
 ```
@@ -606,6 +629,87 @@ OK
 Partitions missing from filesystem:	flights_t:year=2008/month=3	flights_t:year=2008/month=4
 Time taken: 2.605 seconds, Fetched: 1 row(s)
 ```
+
+* if on **Hive Metastore 4.0.1**
+
+or through hive-server if on **Hive Metastore 4.0.1**
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+INFO  : Compiling command(queryId=hive_20250703085508_7c57cc71-bf87-4e12-9014-12c1d5d25809): SHOW PARTITIONS flight_db.flights_t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:partition, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20250703085508_7c57cc71-bf87-4e12-9014-12c1d5d25809); Time taken: 0.285 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20250703085508_7c57cc71-bf87-4e12-9014-12c1d5d25809): SHOW PARTITIONS flight_db.flights_t
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20250703085508_7c57cc71-bf87-4e12-9014-12c1d5d25809); Time taken: 0.056 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+
+|     partition      |
++--------------------+
+| year=2008/month=1  |
+| year=2008/month=2  |
+| year=2008/month=3  |
+| year=2008/month=4  |
++--------------------+
+4 rows selected (0.823 seconds)
+```
+
+if we use Trino to sync partition metadata with the `FULL` option, the no-existing partitions are removed
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
+Which we can check by rerunning the `SHOW PARTITIONS` command again
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/platys-hms (main)> docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2://hive-server:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+INFO  : Compiling command(queryId=hive_20250703085845_df5b167a-cae5-432d-abbe-ff3a1951e891): SHOW PARTITIONS flight_db.flights_t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:partition, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20250703085845_df5b167a-cae5-432d-abbe-ff3a1951e891); Time taken: 0.066 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20250703085845_df5b167a-cae5-432d-abbe-ff3a1951e891): SHOW PARTITIONS flight_db.flights_t
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20250703085845_df5b167a-cae5-432d-abbe-ff3a1951e891); Time taken: 0.032 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+
+|     partition      |
++--------------------+
+| year=2008/month=1  |
+| year=2008/month=2  |
++--------------------+
+2 rows selected (0.244 seconds)
+Beeline version 3.1.3 by Apache Hive
+[WARN] Failed to create directory: /home/hive/.beeline
+No such file or directory
+Closing: 0: jdbc:hive2://hive-server:10000
+```
+
 ## Rollback HMS to Snapshot A
 
 ```bash
@@ -622,6 +726,8 @@ docker exec -i hive-metastore-db pg_restore -U hive -d metastore_db /hms-A.dump
 ```bash
 docker restart hive-metastore
 ```
+
+* if on **Hive Metastore < 4.0.1**
 
 ```
 docker exec -ti hive-metastore hive -e 'show partitions flight_db.flights_t;'
@@ -643,6 +749,32 @@ year=2008/month=1
 Time taken: 1.205 seconds, Fetched: 1 row(s)
 ```
 
+* if on **Hive Metastore 4.0.1**
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+INFO  : Compiling command(queryId=hive_20250703090241_8c82da32-c9e5-49c1-bd42-ca6836a28301): SHOW PARTITIONS flight_db.flights_t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:partition, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20250703090241_8c82da32-c9e5-49c1-bd42-ca6836a28301); Time taken: 0.326 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20250703090241_8c82da32-c9e5-49c1-bd42-ca6836a28301): SHOW PARTITIONS flight_db.flights_t
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20250703090241_8c82da32-c9e5-49c1-bd42-ca6836a28301); Time taken: 0.079 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+
+|     partition      |
++--------------------+
+| year=2008/month=1  |
++--------------------+
+1 row selected (0.582 seconds)
+```
+
 **Check with Trino**
 
 ```
@@ -658,6 +790,8 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 returns `605765`
 
 Repair the table
+
+* if on **Hive Metastore < 4.0.1**
 
 ```bash
 docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
@@ -680,6 +814,44 @@ Partitions not in metastore:	flights_t:year=2008/month=2
 Repair: Added partition to metastore flights_t:year=2008/month=2
 Time taken: 4.73 seconds, Fetched: 2 row(s)
 ```
+
+* if on **Hive Metastore 4.0.1**
+
+if we use Trino to sync partition metadata with the `FULL` option, the no-existing partitions are removed
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+Connecting to jdbc:hive2://hive-server:10000
+Connected to: Apache Hive (version 3.1.3)
+Driver: Hive JDBC (version 3.1.3)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+INFO  : Compiling command(queryId=hive_20250703090552_35217268-2819-48d5-a457-c7c92f8a34f9): SHOW PARTITIONS flight_db.flights_t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:partition, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20250703090552_35217268-2819-48d5-a457-c7c92f8a34f9); Time taken: 0.1 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20250703090552_35217268-2819-48d5-a457-c7c92f8a34f9): SHOW PARTITIONS flight_db.flights_t
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20250703090552_35217268-2819-48d5-a457-c7c92f8a34f9); Time taken: 0.052 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+
+|     partition      |
++--------------------+
+| year=2008/month=1  |
+| year=2008/month=2  |
++--------------------+
+```
+
 
 **Check with Trino**
 
@@ -712,6 +884,8 @@ docker exec -i hive-metastore-db pg_restore -U hive -d metastore_db /hms-B.dump
 ```bash
 docker restart hive-metastore
 ```
+
+* if on **Hive Metastore < 4.0.1**
 
 ```
 docker exec -ti hive-metastore hive -e 'show partitions flight_db.flights_t;'
@@ -755,6 +929,66 @@ OK
 Partitions missing from filesystem:	flights_t:year=2008/month=3
 Time taken: 3.038 seconds, Fetched: 1 row(s)
 ```
+
+* if on **Hive Metastore 4.0.1**
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+INFO  : Compiling command(queryId=hive_20250703090923_038c0de7-c392-4a44-9c6b-4bb591c6aa35): SHOW PARTITIONS flight_db.flights_t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:partition, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20250703090923_038c0de7-c392-4a44-9c6b-4bb591c6aa35); Time taken: 0.343 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20250703090923_038c0de7-c392-4a44-9c6b-4bb591c6aa35): SHOW PARTITIONS flight_db.flights_t
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20250703090923_038c0de7-c392-4a44-9c6b-4bb591c6aa35); Time taken: 0.112 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+
+|     partition      |
++--------------------+
+| year=2008/month=1  |
+| year=2008/month=2  |
+| year=2008/month=3  |
++--------------------+
+```
+
+if we use Trino to sync partition metadata with the `FULL` option, the no-existing partitions are removed
+
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+INFO  : Compiling command(queryId=hive_20250703091030_d171fc32-d31b-43fd-97e9-14481eaa5015): SHOW PARTITIONS flight_db.flights_t
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Semantic Analysis Completed (retrial = false)
+INFO  : Returning Hive schema: Schema(fieldSchemas:[FieldSchema(name:partition, type:string, comment:from deserializer)], properties:null)
+INFO  : Completed compiling command(queryId=hive_20250703091030_d171fc32-d31b-43fd-97e9-14481eaa5015); Time taken: 0.144 seconds
+INFO  : Concurrency mode is disabled, not creating a lock manager
+INFO  : Executing command(queryId=hive_20250703091030_d171fc32-d31b-43fd-97e9-14481eaa5015): SHOW PARTITIONS flight_db.flights_t
+INFO  : Starting task [Stage-0:DDL] in serial mode
+INFO  : Completed executing command(queryId=hive_20250703091030_d171fc32-d31b-43fd-97e9-14481eaa5015); Time taken: 0.066 seconds
+INFO  : OK
+INFO  : Concurrency mode is disabled, not creating a lock manager
++--------------------+
+|     partition      |
++--------------------+
+| year=2008/month=1  |
+| year=2008/month=2  |
++--------------------+
+2 rows selected (0.376 seconds)
+```
+
 
 **Check with Trino**
 
