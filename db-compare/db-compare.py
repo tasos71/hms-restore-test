@@ -52,9 +52,9 @@ def test_row_counts(table):
 @pytest.mark.parametrize("table", tables)
 def test_value_compare(table):
     with src_engine.connect() as conn:
-        src_count = conn.execute(text(f"SELECT md5(string_agg(t::text, ',' ORDER BY rn)) AS fingerprint FROM (SELECT t.*, row_number() OVER () AS rn FROM \"{table}\" AS t) t")).scalar()
+        src_fingerprint = conn.execute(text(f"SELECT md5(string_agg(t::text, ',' ORDER BY rn)) AS fingerprint FROM (SELECT t.*, row_number() OVER () AS rn FROM \"{table}\" AS t) t")).scalar()
 
     with tgt_engine.connect() as conn:
-        tgt_count = conn.execute(text(f"SELECT md5(string_agg(t::text, ',' ORDER BY rn)) AS fingerprint FROM (SELECT t.*, row_number() OVER () AS rn FROM \"{table}\" AS t) t")).scalar()
+        tgt_fingerprint = conn.execute(text(f"SELECT md5(string_agg(t::text, ',' ORDER BY rn)) AS fingerprint FROM (SELECT t.*, row_number() OVER () AS rn FROM \"{table}\" AS t) t")).scalar()
 
-    assert src_count == tgt_count, f"Mismatch in table '{table}': {src_count} != {tgt_count}"
+    assert src_fingerprint == tgt_fingerprint, f"Mismatch in table '{table}': {src_fingerprint} != {tgt_fingerprint}"
