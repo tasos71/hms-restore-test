@@ -15,135 +15,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.apache.hive.hcatalog.listener;
 
-
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Arrays;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
+import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.PathFilter;
-import org.apache.hadoop.hive.conf.HiveConf;
-import org.apache.hadoop.hive.metastore.HMSHandler;
 import org.apache.hadoop.hive.metastore.MetaStoreEventListenerConstants;
-import org.apache.hadoop.hive.metastore.RawStore;
-import org.apache.hadoop.hive.metastore.RawStoreProxy;
 import org.apache.hadoop.hive.metastore.ReplChangeManager;
 import org.apache.hadoop.hive.metastore.TransactionalMetaStoreEventListener;
 import org.apache.hadoop.hive.metastore.Warehouse;
-import org.apache.hadoop.hive.metastore.api.Database;
-import org.apache.hadoop.hive.metastore.api.Function;
-import org.apache.hadoop.hive.metastore.api.MetaException;
-import org.apache.hadoop.hive.metastore.api.NotificationEvent;
-import org.apache.hadoop.hive.metastore.api.Partition;
-import org.apache.hadoop.hive.metastore.api.SQLCheckConstraint;
-import org.apache.hadoop.hive.metastore.api.SQLDefaultConstraint;
-import org.apache.hadoop.hive.metastore.api.SQLForeignKey;
-import org.apache.hadoop.hive.metastore.api.SQLNotNullConstraint;
-import org.apache.hadoop.hive.metastore.api.SQLPrimaryKey;
-import org.apache.hadoop.hive.metastore.api.SQLUniqueConstraint;
-import org.apache.hadoop.hive.metastore.api.Table;
-import org.apache.hadoop.hive.metastore.api.TxnType;
-import org.apache.hadoop.hive.metastore.api.ColumnStatisticsDesc;
+import org.apache.hadoop.hive.metastore.api.*;
 import org.apache.hadoop.hive.metastore.conf.MetastoreConf;
 import org.apache.hadoop.hive.metastore.conf.MetastoreConf.ConfVars;
-import org.apache.hadoop.hive.metastore.events.AddCheckConstraintEvent;
-import org.apache.hadoop.hive.metastore.events.AddDefaultConstraintEvent;
-import org.apache.hadoop.hive.metastore.events.AddForeignKeyEvent;
-import org.apache.hadoop.hive.metastore.events.AddNotNullConstraintEvent;
-import org.apache.hadoop.hive.metastore.events.AddPartitionEvent;
-import org.apache.hadoop.hive.metastore.events.AddPrimaryKeyEvent;
-import org.apache.hadoop.hive.metastore.events.AddUniqueConstraintEvent;
-import org.apache.hadoop.hive.metastore.events.AlterDatabaseEvent;
-import org.apache.hadoop.hive.metastore.events.AlterPartitionEvent;
-import org.apache.hadoop.hive.metastore.events.AlterTableEvent;
-import org.apache.hadoop.hive.metastore.events.BatchAcidWriteEvent;
-import org.apache.hadoop.hive.metastore.events.CommitCompactionEvent;
-import org.apache.hadoop.hive.metastore.events.ConfigChangeEvent;
-import org.apache.hadoop.hive.metastore.events.CreateDatabaseEvent;
-import org.apache.hadoop.hive.metastore.events.CreateFunctionEvent;
-import org.apache.hadoop.hive.metastore.events.CreateTableEvent;
-import org.apache.hadoop.hive.metastore.events.DropConstraintEvent;
-import org.apache.hadoop.hive.metastore.events.DropDatabaseEvent;
-import org.apache.hadoop.hive.metastore.events.DropFunctionEvent;
-import org.apache.hadoop.hive.metastore.events.DropPartitionEvent;
-import org.apache.hadoop.hive.metastore.events.DropTableEvent;
-import org.apache.hadoop.hive.metastore.events.InsertEvent;
-import org.apache.hadoop.hive.metastore.events.LoadPartitionDoneEvent;
-import org.apache.hadoop.hive.metastore.events.OpenTxnEvent;
-import org.apache.hadoop.hive.metastore.events.CommitTxnEvent;
-import org.apache.hadoop.hive.metastore.events.AbortTxnEvent;
-import org.apache.hadoop.hive.metastore.events.AllocWriteIdEvent;
-import org.apache.hadoop.hive.metastore.events.ListenerEvent;
-import org.apache.hadoop.hive.metastore.events.AcidWriteEvent;
-import org.apache.hadoop.hive.metastore.events.UpdatePartitionColumnStatEventBatch;
-import org.apache.hadoop.hive.metastore.events.UpdateTableColumnStatEvent;
-import org.apache.hadoop.hive.metastore.events.DeleteTableColumnStatEvent;
-import org.apache.hadoop.hive.metastore.events.UpdatePartitionColumnStatEvent;
-import org.apache.hadoop.hive.metastore.events.DeletePartitionColumnStatEvent;
-import org.apache.hadoop.hive.metastore.events.ReloadEvent;
-import org.apache.hadoop.hive.metastore.messaging.AbortTxnMessage;
-import org.apache.hadoop.hive.metastore.messaging.AcidWriteMessage;
-import org.apache.hadoop.hive.metastore.messaging.AddCheckConstraintMessage;
-import org.apache.hadoop.hive.metastore.messaging.AddDefaultConstraintMessage;
-import org.apache.hadoop.hive.metastore.messaging.AddForeignKeyMessage;
-import org.apache.hadoop.hive.metastore.messaging.AddNotNullConstraintMessage;
-import org.apache.hadoop.hive.metastore.messaging.AddPrimaryKeyMessage;
-import org.apache.hadoop.hive.metastore.messaging.AddUniqueConstraintMessage;
-import org.apache.hadoop.hive.metastore.messaging.AllocWriteIdMessage;
-import org.apache.hadoop.hive.metastore.messaging.AlterDatabaseMessage;
-import org.apache.hadoop.hive.metastore.messaging.AlterPartitionMessage;
-import org.apache.hadoop.hive.metastore.messaging.AlterTableMessage;
-import org.apache.hadoop.hive.metastore.messaging.CommitCompactionMessage;
-import org.apache.hadoop.hive.metastore.messaging.CommitTxnMessage;
-import org.apache.hadoop.hive.metastore.messaging.CreateDatabaseMessage;
-import org.apache.hadoop.hive.metastore.messaging.CreateFunctionMessage;
-import org.apache.hadoop.hive.metastore.messaging.CreateTableMessage;
-import org.apache.hadoop.hive.metastore.messaging.MessageBuilder;
-import org.apache.hadoop.hive.metastore.messaging.DropConstraintMessage;
-import org.apache.hadoop.hive.metastore.messaging.DropDatabaseMessage;
-import org.apache.hadoop.hive.metastore.messaging.DropFunctionMessage;
-import org.apache.hadoop.hive.metastore.messaging.DropPartitionMessage;
-import org.apache.hadoop.hive.metastore.messaging.DropTableMessage;
-import org.apache.hadoop.hive.metastore.messaging.EventMessage;
+import org.apache.hadoop.hive.metastore.events.*;
+import org.apache.hadoop.hive.metastore.messaging.*;
 import org.apache.hadoop.hive.metastore.messaging.EventMessage.EventType;
-import org.apache.hadoop.hive.metastore.messaging.InsertMessage;
-import org.apache.hadoop.hive.metastore.messaging.MessageEncoder;
-import org.apache.hadoop.hive.metastore.messaging.MessageFactory;
-import org.apache.hadoop.hive.metastore.messaging.MessageSerializer;
-import org.apache.hadoop.hive.metastore.messaging.OpenTxnMessage;
-import org.apache.hadoop.hive.metastore.messaging.PartitionFiles;
-import org.apache.hadoop.hive.metastore.messaging.UpdateTableColumnStatMessage;
-import org.apache.hadoop.hive.metastore.messaging.DeleteTableColumnStatMessage;
-import org.apache.hadoop.hive.metastore.messaging.UpdatePartitionColumnStatMessage;
-import org.apache.hadoop.hive.metastore.messaging.DeletePartitionColumnStatMessage;
-import org.apache.hadoop.hive.metastore.messaging.ReloadMessage;
 import org.apache.hadoop.hive.metastore.tools.SQLGenerator;
 import org.apache.hadoop.hive.metastore.txn.TxnUtils;
 import org.apache.hadoop.hive.metastore.utils.MetaStoreUtils;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hive.hcatalog.data.Pair;
+import org.apache.hive.hcatalog.metastore.KafkaNotificationEvent;
+import org.apache.kafka.clients.producer.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import com.google.common.collect.Lists;
-import static org.apache.hadoop.hive.metastore.conf.MetastoreConf.ConfVars.EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL;
+
+import java.io.IOException;
+import java.sql.*;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
 import static org.apache.hadoop.hive.metastore.utils.MetaStoreUtils.getDefaultCatalog;
 
 /**
@@ -167,31 +74,16 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
   private static final String EV_SEL_SQL = "select \"NEXT_EVENT_ID\" from \"NOTIFICATION_SEQUENCE\"";
   private static final String EV_UPD_SQL =  "update \"NOTIFICATION_SEQUENCE\" set \"NEXT_EVENT_ID\" = ?";
 
-  private static CleanerThread cleaner = null;
-
   private int maxBatchSize;
 
   private Configuration conf;
   private MessageEncoder msgEncoder;
 
+  private static Producer<Long, KafkaNotificationEvent> producer;
+
   //cleaner is a static object, use static synchronized to make sure its thread-safe
   private static synchronized void init(Configuration conf) throws MetaException {
-    if (cleaner == null) {
-      cleaner =
-          new CleanerThread(conf, RawStoreProxy.getProxy(conf, conf,
-              MetastoreConf.getVar(conf, ConfVars.RAW_STORE_IMPL)));
-      cleaner.start();
-    }
-  }
-
-  @VisibleForTesting
-  public static synchronized void resetCleaner(HiveConf conf) throws Exception {
-    if (cleaner != null && conf.getBoolVar(HiveConf.ConfVars.HIVE_IN_TEST_REPL)) {
-      cleaner.interrupt();
-      cleaner.join();
-      cleaner = null;
-      init(conf);
-    }
+    producer = createProducer();
   }
 
   public KafkaNotificationListener(Configuration config) throws MetaException {
@@ -219,30 +111,15 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
       MetastoreConf.setTimeVar(getConf(), MetastoreConf.ConfVars.EVENT_DB_LISTENER_TTL, time,
           TimeUnit.SECONDS);
       boolean isReplEnabled = MetastoreConf.getBoolVar(getConf(), ConfVars.REPLCMENABLED);
-      if(!isReplEnabled){
-        cleaner.setTimeToLive(MetastoreConf.getTimeVar(getConf(), ConfVars.EVENT_DB_LISTENER_TTL,
-                TimeUnit.SECONDS));
-      }
     } else if (key.equals(ConfVars.REPL_EVENT_DB_LISTENER_TTL.toString()) ||
             key.equals(ConfVars.REPL_EVENT_DB_LISTENER_TTL.getHiveName())) {
       long time = MetastoreConf.convertTimeStr(tableEvent.getNewValue(), TimeUnit.SECONDS,
               TimeUnit.SECONDS);
       boolean isReplEnabled = MetastoreConf.getBoolVar(getConf(), ConfVars.REPLCMENABLED);
-      if(isReplEnabled){
-        cleaner.setTimeToLive(time);
-      }
     }
 
     if (key.equals(ConfVars.REPLCMENABLED.toString()) || key.equals(ConfVars.REPLCMENABLED.getHiveName())) {
       boolean isReplEnabled = MetastoreConf.getBoolVar(conf, ConfVars.REPLCMENABLED);
-      if(isReplEnabled){
-        cleaner.setTimeToLive(MetastoreConf.getTimeVar(conf, ConfVars.REPL_EVENT_DB_LISTENER_TTL,
-                TimeUnit.SECONDS));
-      }
-      else {
-        cleaner.setTimeToLive(MetastoreConf.getTimeVar(conf, ConfVars.EVENT_DB_LISTENER_TTL,
-                TimeUnit.SECONDS));
-      }
     }
 
     if (key.equals(ConfVars.EVENT_DB_LISTENER_CLEAN_INTERVAL.toString()) ||
@@ -254,16 +131,8 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
               TimeUnit.SECONDS);
       MetastoreConf.setTimeVar(getConf(), MetastoreConf.ConfVars.EVENT_DB_LISTENER_CLEAN_INTERVAL, time,
               TimeUnit.SECONDS);
-      cleaner.setCleanupInterval(MetastoreConf.getTimeVar(getConf(),
-              MetastoreConf.ConfVars.EVENT_DB_LISTENER_CLEAN_INTERVAL, TimeUnit.MILLISECONDS));
     }
 
-    if (key.equals(EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL.toString()) || key
-        .equals(EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL.getHiveName())) {
-      cleaner.setWaitInterval(MetastoreConf
-          .getTimeVar(getConf(), EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL,
-              TimeUnit.MILLISECONDS));
-    }
   }
 
   /**
@@ -1414,10 +1283,29 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
    */
   private void process(NotificationEvent event, ListenerEvent listenerEvent) throws MetaException {
     event.setMessageFormat(msgEncoder.getMessageFormat());
-    
+
+    KafkaNotificationEvent ne = KafkaNotificationEvent.newBuilder().setEventId(event.getEventId())
+            .setEventTime(event.getEventTime())
+            .setEventType(event.getEventType())
+            .setDbName(event.getDbName())
+            .setTableName(event.getTableName())
+            .setMessage(event.getMessage())
+            .setMessageFormat(event.getMessageFormat())
+            .build();
+
     LOG.debug("KafkaNotificationListener: Processing : {}:{}", event.getEventId(),
         event.getMessage());
-    HMSHandler.getMSForConf(conf).addNotificationEvent(event);
+
+    final ProducerRecord<Long, KafkaNotificationEvent> record = new ProducerRecord<>(TOPIC, 1L, ne);
+
+      try {
+          RecordMetadata metadata = producer.send(record).get();
+      } catch (InterruptedException e) {
+          throw new RuntimeException(e);
+      } catch (ExecutionException e) {
+          throw new RuntimeException(e);
+      }
+      // HMSHandler.getMSForConf(conf).addNotificationEvent(event);
 
     // Set the DB_NOTIFICATION_EVENT_ID for future reference by other listeners.
     if (event.isSetEventId()) {
@@ -1426,78 +1314,22 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
           Long.toString(event.getEventId()));
     }
   }
-  
-  private static class CleanerThread extends Thread {
-    private final RawStore rs;
-    private int ttl;
-    private long sleepTime;
-    private long waitInterval;
-    private boolean isInTest;
 
-    CleanerThread(Configuration conf, RawStore rs) {
-      super("DB-Notification-Cleaner");
-      setDaemon(true);
-      this.rs = Objects.requireNonNull(rs);
+  private final static String TOPIC = "hms.notification.v1";
+  private final static String BOOTSTRAP_SERVERS =
+          "kafka-1:19092, kafka-1:19093, kafka-1:19094";
+  private final static String SCHEMA_REGISTRY_URL = "http://schema-registry-1:8081";
 
-      boolean isReplEnabled = MetastoreConf.getBoolVar(conf, ConfVars.REPLCMENABLED);
-      isInTest = conf.getBoolean(HiveConf.ConfVars.HIVE_IN_TEST_REPL.varname, false);
-      ConfVars ttlConf = (isReplEnabled) ?  ConfVars.REPL_EVENT_DB_LISTENER_TTL : ConfVars.EVENT_DB_LISTENER_TTL;
-      setTimeToLive(MetastoreConf.getTimeVar(conf, ttlConf, TimeUnit.SECONDS));
-      setCleanupInterval(
-          MetastoreConf.getTimeVar(conf, ConfVars.EVENT_DB_LISTENER_CLEAN_INTERVAL, TimeUnit.MILLISECONDS));
-      setWaitInterval(MetastoreConf
-          .getTimeVar(conf, EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL, TimeUnit.MILLISECONDS));
-    }
+  private static Producer<Long, KafkaNotificationEvent> createProducer() {
+    Properties props = new Properties();
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
+    //props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaExampleProducer");
+    //props.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "false");
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+    props.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL);   // use constant for "schema.registry.url"
 
-    @Override
-    public void run() {
-      LOG.info("Wait interval is {}", waitInterval);
-      if (waitInterval > 0) {
-        try {
-          LOG.info("Cleaner Thread Restarted and {} or {} is configured. So cleaner thread will startup post waiting "
-                  + "{} ms", EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL,
-              EVENT_DB_LISTENER_CLEAN_STARTUP_WAIT_INTERVAL.getHiveName(), waitInterval);
-          Thread.sleep(waitInterval);
-        } catch (InterruptedException e) {
-          LOG.error("Failed during the initial wait before start.", e);
-          if(isInTest) {
-            Thread.currentThread().interrupt();
-          }
-          return;
-        }
-        LOG.info("Completed Cleaner thread initial wait. Starting normal processing.");
-      }
-
-      while (true) {
-        LOG.debug("Cleaner thread running");
-        try {
-          rs.cleanNotificationEvents(ttl);
-          rs.cleanWriteNotificationEvents(ttl);
-        } catch (Exception ex) {
-          LOG.warn("Exception received while cleaning notifications", ex);
-        }
-        LOG.debug("Cleaner thread done");
-
-        try {
-          LOG.debug("Sleeping {}ms", sleepTime);
-          Thread.sleep(sleepTime);
-        } catch (InterruptedException e) {
-          LOG.info("Cleaner thread interrupted. Exiting.");
-          return;
-        }
-      }
-    }
-
-    public void setTimeToLive(long configTtl) {
-      this.ttl = (int) Math.min(Integer.MAX_VALUE, configTtl);
-    }
-
-    public void setCleanupInterval(long configInterval) {
-      sleepTime = configInterval;
-    }
-
-    public void setWaitInterval(long waitInterval) {
-      this.waitInterval = waitInterval;
-    }
+    return new KafkaProducer<>(props);
   }
+
 }
