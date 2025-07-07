@@ -1,3 +1,5 @@
 /db-compare/venv
 /db-compare/report
 /db-compare/junitresult
+/hms-backup-restore/venv
+/kafka-listener/target
