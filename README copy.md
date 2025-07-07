@@ -6,7 +6,9 @@ The following scenario will be tested by going through the steps documented belo
 
 ## Preparation of environment
 
+
 ```bash
+cd $DATAPLATFORM_HOME
 sudo rm -R backup
 mkdir -p backup
 
@@ -33,570 +35,103 @@ Create the Kafka Audit Log topic
 
 ```bash
 docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic minio-audit-log
-```
-
-**Create Hive Metastore Table**
-
-```bash
-docker exec -ti hive-metastore hive
-```
-
-you need to connect to `hive-server` if on **Hive Metastore 4.0.1**
-
-```
-!connect jdbc:hive2://hive-server:10000
-```
-
-or through hive-server if on **Hive Metastore 4.0.1**
-
-```bash
-docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000
-```
-
-```sql
-CREATE DATABASE flight_db
-LOCATION 's3a://flight-bucket/';
-
-USE flight_db;
-
-DROP TABLE IF EXISTS airport_t;
-CREATE EXTERNAL TABLE airport_t (id int
-                                , ident string
-                                , type string
-                                , name string
-                                , latitude_deg double
-                                , longitude_deg double
-                                , elevation_ft int
-                                , continent string
-                                , iso_country string
-                                , iso_region string
-                                , municipality string
-                                , scheduled_service string
-                                , gps_code string
-                                , iata_code string
-                                , local_code string
-                                , home_link string
-                                , wikipedia_link string
-                                , keywords string
-                                )
-ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
-WITH SERDEPROPERTIES (
-  "separatorChar" = ",",
-  "quoteChar"     = "\""
-)
-STORED AS TEXTFILE
-LOCATION 's3a://flight-bucket/raw/airports'
-TBLPROPERTIES (
-  "skip.header.line.count" = "1"
-);
-
-CREATE EXTERNAL TABLE flights_t ( dayOfMonth integer
-                             , dayOfWeek integer
-                             , depTime integer
-                             , crsDepTime integer
-                             , arrTime integer
-                             , crsArrTime integer
-                             , uniqueCarrier string
-                             , flightNum string
-                             , tailNum string
-                             , actualElapsedTime integer
-                             , crsElapsedTime integer
-                             , airTime integer
-                             , arrDelay integer
-                             , depDelay integer
-                             , origin string
-                             , destination string
-                             , distance integer) 
-PARTITIONED BY (year integer, month integer)
-STORED AS parquet
-LOCATION 's3a://flight-bucket/refined/flights';
-
-!quit;
-```
-
-Using Trino
-
-```sql
-CREATE SCHEMA minio.flight_db;
-
-DROP TABLE IF EXISTS minio.flight_db.airport_t;
-
-CREATE TABLE minio.flight_db.airport_t (
-    id               VARCHAR,
-    ident            VARCHAR,
-    type             VARCHAR,
-    name             VARCHAR,
-    latitude_deg     VARCHAR,
-    longitude_deg    VARCHAR,
-    elevation_ft     VARCHAR,
-    continent        VARCHAR,
-    iso_country      VARCHAR,
-    iso_region       VARCHAR,
-    municipality     VARCHAR,
-    scheduled_service VARCHAR,
-    gps_code         VARCHAR,
-    iata_code        VARCHAR,
-    local_code       VARCHAR,
-    home_link        VARCHAR,
-    wikipedia_link   VARCHAR,
-    keywords         VARCHAR
-)
-WITH (
-    external_location = 's3a://flight-bucket/raw/airports/',
-    format = 'CSV',
-    skip_header_line_count = 1
-);
-
-DROP TABLE IF EXISTS minio.flight_db.flights_t;
-
-CREATE TABLE minio.flight_db.flights_t (
-    dayOfMonth         INTEGER,
-    dayOfWeek          INTEGER,
-    depTime            INTEGER,
-    crsDepTime         INTEGER,
-    arrTime            INTEGER,
-    crsArrTime         INTEGER,
-    uniqueCarrier      VARCHAR,
-    flightNum          VARCHAR,
-    tailNum            VARCHAR,
-    actualElapsedTime  INTEGER,
-    crsElapsedTime     INTEGER,
-    airTime            INTEGER,
-    arrDelay           INTEGER,
-    depDelay           INTEGER,
-    origin             VARCHAR,
-    destination        VARCHAR,
-    distance           INTEGER,
-    year               INTEGER,
-    month              INTEGER
-)
-WITH (
-    external_location = 's3a://flight-bucket/refined/flights/',
-    format = 'PARQUET',
-    partitioned_by = ARRAY['year', 'month']
-);
-```
-
-**Check the HMS Notification Log**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log" 
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic hms.notification.v1
 ```
 
 ```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log"
+cd $PYTEST_HOME
+python -m venv venv
+source venv/bin/activate.fish
 
-"1","1","CREATE_DATABASE","2025-06-26 15:15:20.000 UTC"
-"2","2","CREATE_TABLE","2025-06-26 15:15:21.000 UTC"
-"3","3","CREATE_TABLE","2025-06-26 15:15:24.000 UTC"
+pip3 install -r requirements.txt
+```
+
+## Handle period 0
+
+```bash
+pytest src/hms_backup_restore_0.py --verbose
+```
+
+```bash
+===================================================================================== test session starts ======================================================================================
+platform darwin -- Python 3.12.10, pytest-8.4.1, pluggy-1.6.0 -- /Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/hms-backup-restore/venv/bin/python3.12
+cachedir: .pytest_cache
+metadata: {'Python': '3.12.10', 'Platform': 'macOS-15.5-arm64-arm-64bit', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'html': '4.1.1', 'metadata': '3.1.1', 'md': '0.2.0', 'order': '1.3.0'}}
+rootdir: /Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/hms-backup-restore
+plugins: html-4.1.1, metadata-3.1.1, md-0.2.0, order-1.3.0
+collected 8 items                                                                                                                                                                              
+
+src/hms_backup_restore_0.py::test_create_schema PASSED                                                                                                                                   [ 12%]
+src/hms_backup_restore_0.py::test_create_airport_table PASSED                                                                                                                            [ 25%]
+src/hms_backup_restore_0.py::test_create_flights_table PASSED                                                                                                                            [ 37%]
+src/hms_backup_restore_0.py::test_airport_counts PASSED                                                                                                                                  [ 50%]
+src/hms_backup_restore_0.py::test_flights_counts PASSED                                                                                                                                  [ 62%]
+src/hms_backup_restore_0.py::test_notifications PASSED                                                                                                                                   [ 75%]
+src/hms_backup_restore_0.py::test_airport_counts_after PASSED                                                                                                                            [ 87%]
+src/hms_backup_restore_0.py::test_flights_counts_after PASSED                                                                                                                            [100%]
 ```
 
 ## Handle period 1
 
 ```bash
-docker exec -ti minio-mc mc cp /data-transfer/airport-data/airports-1.csv minio-1/flight-bucket/raw/airports/airports.csv
+pytest src/hms_backup_restore_1.py --verbose
 ```
-
-```bash
-docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=1 minio-1/flight-bucket/refined/flights/year=2008/
-```
-
-* Execute this if **using Hive Metastore < 4.0.1**
-
-```bash
-docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-```
-
-```
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
-SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
-Hive Session ID = fa9533e9-5152-4421-8da7-9e16fb040591
-OK
-Partitions not in metastore:	flights_t:year=2008/month=1
-Repair: Added partition to metastore flights_t:year=2008/month=1
-Time taken: 3.043 seconds, Fetched: 2 row(s)
-```
-
-
-* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
-```
-
-**Check the HMS Notification Log**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log" 
-```
-
-```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log"
-"1","1","CREATE_DATABASE","2025-06-26 15:15:20.000 UTC"
-"2","2","CREATE_TABLE","2025-06-26 15:15:21.000 UTC"
-"3","3","CREATE_TABLE","2025-06-26 15:15:24.000 UTC"
-"4","4","ADD_PARTITION","2025-06-26 15:17:53.000 UTC"
-```
-
-**Check with Trino**
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.airport_t" 
-```
-
-returns `999`
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_t" 
-```
-
-returns `605765`
 
 **Backup Minio**
 
 ```bash
-cp -R container-volume/minio/ backup/1
+cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/1
 ```
 
 ## Handle period 2
 
-**Backup Hive Metastore (A)**
-
 ```bash
-docker exec -t hive-metastore-db pg_dump -U hive -d metastore_db -F c -f /hms-A.dump
-docker cp hive-metastore-db:/hms-A.dump ./backup
-```
-
-```bash
-docker exec -ti minio-mc mc cp /data-transfer/airport-data/airports-2.csv minio-1/flight-bucket/raw/airports/airports.csv
-```
-
-```bash
-docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=2 minio-1/flight-bucket/refined/flights/year=2008/
-```
-
-* Execute this if **using Hive Metastore < 4.0.1**
-
-```bash
-docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-```
-
-```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
-SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
-Hive Session ID = b85c9448-446e-4e3c-8da6-c51f7d11911f
-
-Logging initialized using configuration in file:/opt/hive/conf/hive-log4j2.properties Async: true
-Hive Session ID = dc5e88e0-eb20-41c3-b518-a14d21e9ed34
-OK
-Partitions not in metastore:	flights_t:year=2008/month=2
-Repair: Added partition to metastore flights_t:year=2008/month=2
-Time taken: 2.943 seconds, Fetched: 2 row(s)
-```
-
-* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
-```
-
-**Check the HMS Notification Log**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log" 
-```
-
-```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log"
-"1","1","CREATE_DATABASE","2025-06-26 09:53:28.000 UTC"
-"2","2","CREATE_TABLE","2025-06-26 09:53:29.000 UTC"
-"3","3","CREATE_TABLE","2025-06-26 09:53:32.000 UTC"
-"4","4","ADD_PARTITION","2025-06-26 09:53:34.000 UTC"
-"5","5","ADD_PARTITION","2025-06-26 09:54:43.000 UTC"
-```
-
-**Check with Trino** 
-
-```
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.airport_t" 
-```
-
-returns `1240`
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_t" 
-```
-
-returns `1175001`
-
-**Create a new table based on the exising `flights_t` table**
-
-```bash
-docker exec -ti hive-metastore hive
-```
-
-you need to connect to `hive-server` if on **Hive Metastore 4.0.1**
-
-```
-!connect jdbc:hive2://hive-server:10000
-```
-
-or through hive-server if on **Hive Metastore 4.0.1**
-
-```bash
-docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000
-```
-
-```sql
-use flight_db;
-
-CREATE EXTERNAL TABLE flights_per_carrier_t (
-  uniquecarrier STRING,
-  flight_count BIGINT
-)
-STORED AS PARQUET
-LOCATION 's3a://flight-bucket/refined/flights-per-carrier';
-
-!quit;
-```
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "INSERT INTO minio.flight_db.flights_per_carrier_t SELECT uniquecarrier, COUNT(*) AS flight_count FROM minio.flight_db.flights_t GROUP BY uniquecarrier" 
-```
-
-**Check with Trino** 
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_per_carrier_t" 
-```
-
-returns `20`
-
-**Check the HMS Notification Log**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log" 
-```
-
-```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log"
-"1","1","CREATE_DATABASE","2025-06-26 09:53:28.000 UTC"
-"2","2","CREATE_TABLE","2025-06-26 09:53:29.000 UTC"
-"3","3","CREATE_TABLE","2025-06-26 09:53:32.000 UTC"
-"4","4","ADD_PARTITION","2025-06-26 09:53:34.000 UTC"
-"5","5","ADD_PARTITION","2025-06-26 09:54:43.000 UTC"
-"6","6","CREATE_TABLE","2025-06-26 09:55:42.000 UTC"
-"7","7","ALTER_TABLE","2025-06-26 09:55:53.000 UTC"
+pytest src/hms_backup_restore_2.py --verbose
 ```
 
 **Backup Minio**
 
 ```bash
-cp -R container-volume/minio/ backup/2
+cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/2
 ```
 
 ## Handle period 3
 
-**Upload `flights`**
-
 ```bash
-docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=3 minio-1/flight-bucket/refined/flights/year=2008/
+pytest src/hms_backup_restore_3.py --verbose
 ```
-
-* Execute this if **using Hive Metastore < 4.0.1**
-
-```bash
-docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-```
-
-* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
-```
-
-**Backup Hive Metastore (B)**
-
-```bash
-docker exec -t hive-metastore-db pg_dump -U hive -d metastore_db -F c -f /hms-B.dump
-docker cp hive-metastore-db:/hms-B.dump ./backup
-```
-
-**Upload `airports`**
-
-```bash
-docker exec -ti minio-mc mc cp /data-transfer/airport-data/airports-3.csv minio-1/flight-bucket/raw/airports/airports.csv
-```
-
-```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
-SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
-Hive Session ID = 1e53fba8-24a1-4bef-881c-63a61151d00e
-
-Logging initialized using configuration in file:/opt/hive/conf/hive-log4j2.properties Async: true
-Hive Session ID = 6a3175c5-4e46-49e8-bf30-fc1ac459280a
-OK
-Partitions not in metastore:	flights_t:year=2008/month=3
-Repair: Added partition to metastore flights_t:year=2008/month=3
-Time taken: 2.827 seconds, Fetched: 2 row(s)
-```
-
-**Check the HMS Notification Log**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log" 
-```
-
-```
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type from hive_metastore_db.public.notification_log"
-"1","1","CREATE_DATABASE","2025-06-26 09:53:28.000 UTC"
-"2","2","CREATE_TABLE","2025-06-26 09:53:29.000 UTC"
-"3","3","CREATE_TABLE","2025-06-26 09:53:32.000 UTC"
-"4","4","ADD_PARTITION","2025-06-26 09:53:34.000 UTC"
-"5","5","ADD_PARTITION","2025-06-26 09:54:43.000 UTC"
-"6","6","CREATE_TABLE","2025-06-26 09:55:42.000 UTC"
-"7","7","ALTER_TABLE","2025-06-26 09:55:53.000 UTC"
-"8","8","ADD_PARTITION","2025-06-26 09:57:13.000 UTC"
-```
-
-**Check with Trino**
-
-```
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.airport_t" 
-```
-
-returns `2150`
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_t" 
-```
-
-returns `1791091`
 
 **Backup Minio**
 
 ```bash
-cp -R container-volume/minio/ backup/3
+cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/3
 ```
+
 
 ## Handle period 4
 
-**Backup Hive Metastore (C)**
+```bash
+pytest src/hms_backup_restore_4.py --verbose
+```
+
+**Backup Minio**
 
 ```bash
-docker exec -t hive-metastore-db pg_dump -U hive -d metastore_db -F c -f /hms-C.dump
-docker cp hive-metastore-db:/hms-C.dump ./backup
-```
-
-```bash
-docker exec -ti minio-mc mc cp /data-transfer/airport-data/airports-4.csv minio-1/flight-bucket/raw/airports/airports.csv
-```
-
-List the versions of an object
-
-```bash
-docker exec -ti minio-mc mc ls --versions minio-1/flight-bucket/raw/airports/airports.csv
-```
-
-```bash
-docker exec -ti minio-mc mc cp --recursive /data-transfer/flight-data/flights-medium-parquet-partitioned/flights/year=2008/month=4 minio-1/flight-bucket/refined/flights/year=2008/
-```
-
-* Execute this if **using Hive Metastore < 4.0.1**
-
-```bash
-docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-```
-
-```
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti hive-metastore hive -e 'MSCK REPAIR TABLE flight_db.flights_t;'
-SLF4J: Class path contains multiple SLF4J bindings.
-SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-log4j12-1.7.25.jar!/org/slf4j/impl/StaticLoggerBinder.class]
-SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
-SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
-Hive Session ID = ce3f3db9-9c7c-4504-aa75-2b33da3e88db
-
-Logging initialized using configuration in file:/opt/hive/conf/hive-log4j2.properties Async: true
-Hive Session ID = 5cde7a6b-cf73-4a7b-bbf0-e808798fc4a2
-OK
-Partitions not in metastore:	flights_t:year=2008/month=4
-Repair: Added partition to metastore flights_t:year=2008/month=4
-Time taken: 2.969 seconds, Fetched: 2 row(s)
-```
-
-* Execute this if **using Metastore 4.0.1** with [**Trino 351+**](https://trino.io/docs/current/connector/hive.html#procedures)
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
-```
-
-**Check the HMS Notification Log**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log" 
-```
-
-```
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select nl_id, event_id, event_type, from_unixtime(event_time) from hive_metastore_db.public.notification_log"
-
-"1","1","CREATE_DATABASE","2025-06-26 15:15:20.000 UTC"
-"2","2","CREATE_TABLE","2025-06-26 15:15:21.000 UTC"
-"3","3","CREATE_TABLE","2025-06-26 15:15:24.000 UTC"
-"4","4","ADD_PARTITION","2025-06-26 15:17:53.000 UTC"
-"5","5","ADD_PARTITION","2025-06-26 15:21:57.000 UTC"
-"6","6","CREATE_TABLE","2025-06-26 15:23:06.000 UTC"
-"7","7","ALTER_TABLE","2025-06-26 15:23:17.000 UTC"
-"8","8","ADD_PARTITION","2025-06-26 15:25:07.000 UTC"
-"9","9","ADD_PARTITION","2025-06-26 15:31:19.000 UTC"
-```
-
-**Check with Trino**
-
-```bash
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.airport_t" 
-```
-
-returns `81193`
-
-```sql
-docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_t" 
-```
-
-returns `2389217`
-
-**Backup Minio & Hive Metastore**
-
-```bash
-cp -R container-volume/minio/ backup/4
+cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/4
 ```
 
 ## Handle Period 5
 
-**Backup Hive Metastore (D)**
-
 ```bash
-docker exec -t hive-metastore-db pg_dump -U hive -d metastore_db -F c -f /hms-D.dump
-docker cp hive-metastore-db:/hms-D.dump ./backup
+pytest src/hms_backup_restore_5.py --verbose
 ```
 
+
 ```bash
-docker cp hive-metastore-db:/hms-A.dump ./backup
-docker cp hive-metastore-db:/hms-B.dump ./backup
-docker cp hive-metastore-db:/hms-C.dump ./backup
-docker cp hive-metastore-db:/hms-D.dump ./backup
+docker cp hive-metastore-db:/hms-A.dump ../platys-hms/backup
+docker cp hive-metastore-db:/hms-B.dump ../platys-hms/backup
+docker cp hive-metastore-db:/hms-C.dump ../platys-hms/backup
+docker cp hive-metastore-db:/hms-D.dump ../platys-hms/backup
 ```
 
 ## Rollback Minio to end of Period 2
@@ -605,24 +140,28 @@ Let's rollback MinIO to the backup of the end Period 2
 
 
 ```bash
+cd $DATAPLATFORM_HOME
 docker stop minio-1 && docker rm minio-1
 
 rm -R container-volume/minio/*
 cp -R backup/2/* container-volume/minio
 
 docker compose up -d
+cd $PYTEST_HOME
 ```
 
 List the versions of an object
 
 ```bash
-docker exec -ti minio-mc mc ls --versions minio-1/flight-bucket/raw/airports/airports.csv
+docker exec -ti minio-mc mc ls --versions minio-1/flight-bucket/raw/airports
 ```
 
 ```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti minio-mc mc ls --versions minio-1/flight-bucket/raw/airports/airports.csv
-[2025-06-26 13:10:19 UTC] 169KiB STANDARD 6ddf4f7a-fe17-4f86-a4f7-4513ee22dd4a v2 PUT airports.csv
-[2025-06-26 13:08:09 UTC] 136KiB STANDARD 435c2577-f96d-4a05-8af1-256d0e0cb90e v1 PUT airports.csv
+guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/platys-hms (main)> docker exec -ti minio-mc mc ls --versions minio-1/flight-bucket/raw/airports
+[2025-07-07 08:29:47 UTC]     0B STANDARD null v1 PUT /
+[2025-07-07 08:50:20 UTC]     0B STANDARD 475982d3-abe6-4206-af9c-357aac83c9ed v2 DEL airports-1.csv
+[2025-07-07 08:49:16 UTC] 136KiB STANDARD 487b5784-dfd9-4b78-8be6-d2f97788433b v1 PUT airports-1.csv
+[2025-07-07 08:50:20 UTC] 169KiB STANDARD f5079641-c447-40a1-9e85-e34fda67b2ad v1 PUT airports-2.csv
 ```
 
 ```bash
@@ -630,8 +169,32 @@ docker exec -ti minio-mc mc tree --files  minio-1/flight-bucket/refined/flights
 ```
 
 ```bash
-guido.schmutz@AMAXDKFVW0HYY ~/w/platys-hms> docker exec -ti minio-mc mc tree --files  minio-1/flight-bucket/refined/flights
+guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/platys-hms (main)> docker exec -ti minio-mc mc tree --files  minio-1/flight-bucket/refined/flights
 minio-1/flight-bucket/refined/flights
+├─ 
+│  └─ year=2008
+│     ├─ month=1
+│     │  ├─ part-00000-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00001-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00002-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00003-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00004-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00005-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00006-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00007-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  ├─ part-00008-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     │  └─ part-00009-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
+│     └─ month=2
+│        ├─ part-00000-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00001-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00002-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00003-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00004-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00005-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00006-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00007-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        ├─ part-00008-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
+│        └─ part-00009-2b462dad-0a94-47a4-81fa-6115c3f7d62f.c000.snappy.parquet
 └─ year=2008
    ├─ month=1
    │  ├─ part-00000-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet
@@ -787,6 +350,7 @@ Closing: 0: jdbc:hive2://hive-server:10000
 ## Rollback HMS to Snapshot A
 
 ```bash
+cd $DATAPLATFORM_HOME
 docker stop hive-metastore-db && docker rm hive-metastore-db
 
 docker compose up -d
@@ -799,6 +363,7 @@ docker exec -i hive-metastore-db pg_restore -U hive -d metastore_db /hms-A.dump
 
 ```bash
 docker restart hive-metastore
+cd $PYTEST_HOME
 ```
 
 * if on **Hive Metastore < 4.0.1**
@@ -861,7 +426,7 @@ returns `1240`
 docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_t" 
 ```
 
-returns `605765`
+returns `605765` but **should be** `1175001` (if both partitions would be known)
 
 Repair the table
 
@@ -942,9 +507,23 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 returns `1175001`
 
 
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_per_carrier_t" 
+```
+
+returns an error, as the table `flights_per_carrier_t` has been created **after** HMS Snapshot A.
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_
+db.flights_per_carrier_t" 
+Query 20250707_093733_00042_mup4g failed: line 1:22: Table 'minio.flight_db.flights_per_carrier_t' does not exist
+select count(*) from minio.flight_db.flights_per_carrier_t
+```
+
 ## Rollback HMS to Snapshot B
 
 ```bash
+cd $DATAPLATFORM_HOME
 docker stop hive-metastore-db && docker rm hive-metastore-db
 
 docker compose up -d
@@ -957,6 +536,7 @@ docker exec -i hive-metastore-db pg_restore -U hive -d metastore_db /hms-B.dump
 
 ```bash
 docker restart hive-metastore
+cd $PYTEST_HOME
 ```
 
 * if on **Hive Metastore < 4.0.1**
@@ -1078,4 +658,8 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 
 returns `1175001`
 
+```bash
+docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "select count(*) from minio.flight_db.flights_per_carrier_t" 
+```
 
+returns `20` (by restoring a HMS Snapshot later than the latest object in S3, we also get the `CREATE TABLE` rolled-back.
