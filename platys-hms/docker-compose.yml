@@ -152,6 +152,41 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
+  #  ================================== Confluent Schema Registry ========================================== #
+  schema-registry-1:
+    image: confluentinc/cp-schema-registry:7.9.1
+    hostname: schema-registry-1
+    container_name: schema-registry-1
+    labels:
+      com.platys.name: schema-registry
+      com.platys.description: Confluent Schema Registry
+      com.platys.restapi.title: Schema Registry REST API
+      com.platys.restapi.url: http://dataplatform:8081
+    ports:
+      - 8081:8081
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry-1
+      SCHEMA_REGISTRY_LISTENERS: http://0.0.0.0:8081
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      SCHEMA_REGISTRY_GROUP_ID: schema-registry
+      SCHEMA_REGISTRY_LEADER_ELIGIBILITY: 'True'
+      SCHEMA_REGISTRY_MODE_MUTABILITY: 'True'
+      SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: backward
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_ORIGIN: '*'
+      SCHEMA_REGISTRY_ACCESS_CONTROL_ALLOW_METHODS: GET,POST,PUT,OPTIONS
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: info
+      SCHEMA_REGISTRY_DEBUG: 'False'
+      SCHEMA_REGISTRY_KAFKASTORE_SECURITY_PROTOCOL: PLAINTEXT
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./plugins/opentelemetry/agents:/otel
+    restart: unless-stopped
+    healthcheck:
+      start_period: 10s
+      interval: 10s
+      retries: 20
+      test: curl --fail --silent --insecure http://schema-registry-1:8081/subjects --output /dev/null || exit 1
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   akhq:
     image: tchiotludo/akhq:latest
@@ -188,6 +223,9 @@ services:
             docker-kafka-server:
               properties:
                 bootstrap.servers: 'kafka-1:19092,kafka-2:19093,kafka-3:19094'
+              schema-registry:
+                url: "http://schema-registry-1:8081"
+                type: "confluent"
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
@@ -317,18 +355,63 @@ services:
       timeout: 10s
       retries: 10
       start_period: 20s
+  #  ================================== Apache Hive Server ========================================== #
+  hive-server:
+    image: trivadis/apache-hive:4.0.1-postgresql-metastore-s3
+    container_name: hive-server
+    hostname: hive-server
+    labels:
+      com.platys.name: hive
+      com.platys.description: Hive Server
+      com.platys.webui.title: Hive Server UI
+      com.platys.webui.url: http://dataplatform:10002
+    depends_on:
+      hive-metastore:
+        condition: service_healthy
+    ports:
+      - 10000:10000
+      - 10001:10001
+      - 10002:10002
+    environment:
+      SERVICE_PRECONDITION: hive-metastore:9083
+      SERVICE_NAME: hiveserver2
+      SERVICE_OPTS: -Dhive.metastore.uris=thrift://hive-metastore:9083
+      IS_RESUME: 'true'
+      HIVE_SITE_CONF_fs_defaultFS: s3a://admin-bucket
+      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio-1:9000
+      HIVE_SITE_CONF_fs_s3a_access_key: ${PLATYS_AWS_ACCESS_KEY:-admin}
+      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_AWS_SECRET_ACCESS_KEY:-abc123abc123}
+      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
+      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
+      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
+      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
+    healthcheck:
+      test: [CMD, nc, -z, hive-server, '10000']
+      interval: 30s
+      timeout: 10s
+      retries: 10
   #  ================================== Apache Hive Metastore ========================================== #
   hive-metastore:
-    image: trivadis/apache-hive:3.1.2-postgresql-metastore-s3
+    image: trivadis/apache-hive:4.0.1-postgresql-metastore-s3
     container_name: hive-metastore
     hostname: hive-metastore
     labels:
       com.platys.name: hive-metastore
       com.platys.description: Hive Metastore
+    depends_on:
+      hive-metastore-db:
+        condition: service_healthy
     ports:
       - 9083:9083
     environment:
-      HIVE_VER: 3.1.2
+      HIVE_VER: 4.0.1
       CORE_CONF_fs_defaultFS: file:///tmp
       HIVE_SITE_CONF_fs_defaultFS: file:///tmp
       HIVE_SITE_CONF_fs_s3a_endpoint: http://minio-1:9000
@@ -346,13 +429,21 @@ services:
       # necessary for Trino to be able to read from Avro
       HIVE_SITE_CONF_metastore_storage_schema_reader_impl: org.apache.hadoop.hive.metastore.SerDeStorageSchemaReader
       SERVICE_PRECONDITION: hive-metastore-db:5432
-      HIVE_SITE_CONF_hive_metastore_transactional_event_listeners: org.apache.hive.hcatalog.listener.DbNotificationListener
+      HIVE_SITE_CONF_hive_metastore_transactional_event_listeners: org.apache.hive.hcatalog.listener.KafkaNotificationListener,org.apache.hive.hcatalog.listener.DbNotificationListener
+      HIVE_SITE_CONF_hive_metastore_event_db_listener_timetolive: 86400   # 1 day
+      HIVE_SITE_CONF_hive_metastore_event_db_listener_clean_interval: 7200  # 2 hours
       DB_DRIVER: postgres
       SERVICE_NAME: metastore
       SERVICE_OPTS: -Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db/metastore_db -Djavax.jdo.option.ConnectionUserName=hive -Djavax.jdo.option.ConnectionPassword=${PLATYS_HMS_POSTGRESQL_PASSWORD:-abc123!}
     volumes:
       - ./data-transfer:/data-transfer
+      - ./plugins/hive-metastore/hms-kafka-listener-0.1.0.jar:/opt/hive/lib/hms-kafka-listener-0.1.0.jar
     restart: unless-stopped
+    healthcheck:
+      test: [CMD, nc, -z, hive-metastore, '9083']
+      interval: 30s
+      timeout: 10s
+      retries: 10
   hive-metastore-db:
     image: postgres
     container_name: hive-metastore-db
@@ -370,6 +461,8 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
+    healthcheck:
+      test: [CMD, psql, -U, hive, metastore_db]
   #  ================================== Zeppelin ========================================== #
   zeppelin:
     image: apache/zeppelin:0.11.2
