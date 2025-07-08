@@ -49,6 +49,7 @@ pip3 install -r requirements.txt
 ## Handle period 0
 
 ```bash
+cd $PYTEST_HOME
 pytest src/hms_backup_restore_0.py --verbose
 ```
 
