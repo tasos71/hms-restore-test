@@ -55,3 +55,7 @@ def test_notifications_after_create_carrier_table():
 @pytest.mark.order(120)
 def test_flights_per_carrier_counts_after():
     hms_backup_restore_base.assert_count('flights_per_carrier_t', 20)
+
+@pytest.mark.order(130)
+def test_backup_minio():
+    hms_backup_restore_base.backup_minio(2)

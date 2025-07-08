@@ -40,3 +40,6 @@ def test_airport_counts_after():
 def test_flights_counts_after():
     hms_backup_restore_base.assert_count('flights_t', 605765)
 
+@pytest.mark.order(80)
+def test_backup_minio():
+    hms_backup_restore_base.backup_minio(1)

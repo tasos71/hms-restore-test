@@ -1,6 +1,7 @@
 import pytest
 import os
 import docker
+import shutil
 from sqlalchemy import create_engine,text
 
 
@@ -144,11 +145,11 @@ def upload_flights(period):
 
 def backup_minio(period):
     # Run a temporary container (e.g., alpine echo)
-    output = client.containers.get('minio-mc').exec_run(
-        cmd=f"cp -R container-volume/minio/ backup/{period}",
-    )
 
-    return output
+    source_folder = "../platys-hms/container-volume/minio/"
+    destination_folder = f"../platys-hms/backup/{period}"
+
+    shutil.copytree(source_folder, destination_folder)
 
 def backup_hms(savepoint):
     # Run a temporary container (e.g., alpine echo)
