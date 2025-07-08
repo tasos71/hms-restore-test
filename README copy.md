@@ -64,13 +64,7 @@ pytest src/hms_backup_restore_0.py --verbose
 ```
 
 ```bash
-===================================================================================== test session starts ======================================================================================
-platform darwin -- Python 3.12.10, pytest-8.4.1, pluggy-1.6.0 -- /Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/hms-backup-restore/venv/bin/python3.12
-cachedir: .pytest_cache
-metadata: {'Python': '3.12.10', 'Platform': 'macOS-15.5-arm64-arm-64bit', 'Packages': {'pytest': '8.4.1', 'pluggy': '1.6.0'}, 'Plugins': {'html': '4.1.1', 'metadata': '3.1.1', 'md': '0.2.0', 'order': '1.3.0'}}
-rootdir: /Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/hms-backup-restore
-plugins: html-4.1.1, metadata-3.1.1, md-0.2.0, order-1.3.0
-collected 8 items                                                                                                                                                                              
+===================================================================================== test session starts ======================================================================================                                                                                                                                                                            
 
 src/hms_backup_restore_0.py::test_create_schema PASSED                                                                                                                                   [ 12%]
 src/hms_backup_restore_0.py::test_create_airport_table PASSED                                                                                                                            [ 25%]
@@ -88,10 +82,18 @@ src/hms_backup_restore_0.py::test_flights_counts_after PASSED                   
 pytest src/hms_backup_restore_1.py --verbose
 ```
 
-**Backup Minio**
-
 ```bash
-cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/1
+===================================================================================== test session starts ======================================================================================                                                                                                                                                                            
+
+src/hms_backup_restore_1.py::test_airport_counts PASSED                                                           [ 11%]
+src/hms_backup_restore_1.py::test_flights_counts PASSED                                                           [ 22%]
+src/hms_backup_restore_1.py::test_upload_airport_1 PASSED                                                         [ 33%]
+src/hms_backup_restore_1.py::test_upload_flights_1 PASSED                                                         [ 44%]
+src/hms_backup_restore_1.py::test_repair_partitions PASSED                                                        [ 55%]
+src/hms_backup_restore_1.py::test_notifications PASSED                                                            [ 66%]
+src/hms_backup_restore_1.py::test_airport_counts_after PASSED                                                     [ 77%]
+src/hms_backup_restore_1.py::test_flights_counts_after PASSED                                                     [ 88%]
+src/hms_backup_restore_1.py::test_backup_minio PASSED                                                             [100%]
 ```
 
 ## Handle period 2
@@ -100,10 +102,43 @@ cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/1
 pytest src/hms_backup_restore_2.py --verbose
 ```
 
+```bash
+===================================================================================== test session starts ======================================================================================                                                                                                                                                                            
+
+src/hms_backup_restore_2.py::test_backup_hms PASSED                                                               [  7%]
+src/hms_backup_restore_2.py::test_airport_counts PASSED                                                           [ 15%]
+src/hms_backup_restore_2.py::test_flights_counts PASSED                                                           [ 23%]
+src/hms_backup_restore_2.py::test_upload_airport_1 PASSED                                                         [ 30%]
+src/hms_backup_restore_2.py::test_upload_flights_1 PASSED                                                         [ 38%]
+src/hms_backup_restore_2.py::test_repair_partitions PASSED                                                        [ 46%]
+src/hms_backup_restore_2.py::test_notifications PASSED                                                            [ 53%]
+src/hms_backup_restore_2.py::test_airport_counts_after PASSED                                                     [ 61%]
+src/hms_backup_restore_2.py::test_flights_counts_after PASSED                                                     [ 69%]
+src/hms_backup_restore_2.py::test_create_flights_per_carrier_table PASSED                                         [ 76%]
+src/hms_backup_restore_2.py::test_notifications_after_create_carrier_table PASSED                                 [ 84%]
+src/hms_backup_restore_2.py::test_flights_per_carrier_counts_after PASSED                                         [ 92%]
+src/hms_backup_restore_2.py::test_backup_minio PASSED                                                             [100%]
+```
+
 ## Handle period 3
 
 ```bash
 pytest src/hms_backup_restore_3.py --verbose
+```
+
+```bash
+===================================================================================== test session starts ======================================================================================                                                                                                                                                                            
+
+src/hms_backup_restore_3.py::test_airport_counts PASSED                                                           [ 10%]
+src/hms_backup_restore_3.py::test_flights_counts PASSED                                                           [ 20%]
+src/hms_backup_restore_3.py::test_upload_flights_1 PASSED                                                         [ 30%]
+src/hms_backup_restore_3.py::test_repair_partitions PASSED                                                        [ 40%]
+src/hms_backup_restore_3.py::test_backup_hms PASSED                                                               [ 50%]
+src/hms_backup_restore_3.py::test_upload_airport_1 PASSED                                                         [ 60%]
+src/hms_backup_restore_3.py::test_notifications PASSED                                                            [ 70%]
+src/hms_backup_restore_3.py::test_airport_counts_after PASSED                                                     [ 80%]
+src/hms_backup_restore_3.py::test_flights_counts_after PASSED                                                     [ 90%]
+src/hms_backup_restore_3.py::test_backup_minio PASSED                                                             [100%]
 ```
 
 ## Handle period 4
@@ -112,12 +147,32 @@ pytest src/hms_backup_restore_3.py --verbose
 pytest src/hms_backup_restore_4.py --verbose
 ```
 
+```bash
+===================================================================================== test session starts ======================================================================================                                                                                                                                                                            
+
+src/hms_backup_restore_4.py::test_backup_hms PASSED                                                               [ 10%]
+src/hms_backup_restore_4.py::test_airport_counts_before PASSED                                                    [ 20%]
+src/hms_backup_restore_4.py::test_flights_counts_before PASSED                                                    [ 30%]
+src/hms_backup_restore_4.py::test_upload_airport_1 PASSED                                                         [ 40%]
+src/hms_backup_restore_4.py::test_upload_flights_1 PASSED                                                         [ 50%]
+src/hms_backup_restore_4.py::test_repair_partitions PASSED                                                        [ 60%]
+src/hms_backup_restore_4.py::test_notifications PASSED                                                            [ 70%]
+src/hms_backup_restore_4.py::test_airport_counts_after PASSED                                                     [ 80%]
+src/hms_backup_restore_4.py::test_flights_counts_after PASSED                                                     [ 90%]
+src/hms_backup_restore_4.py::test_backup_minio PASSED                                                             [100%]
+```
+
 ## Handle Period 5
 
 ```bash
 pytest src/hms_backup_restore_5.py --verbose
 ```
 
+```bash
+===================================================================================== test session starts ======================================================================================                                                                                                                                                                            
+
+src/hms_backup_restore_5.py::test_backup_hms PASSED                                                               [100%]
+```
 
 ```bash
 docker cp hive-metastore-db:/hms-A.dump ../platys-hms/backup
@@ -513,11 +568,9 @@ select count(*) from minio.flight_db.flights_per_carrier_t
 ```
 
 ```bash
-kcat -q -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081
+kcat -q -u -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081
 
-kcat -q -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081 | jq
-
-kcat -q -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081 | jq .eventType
+kcat -q -u -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081 | jq
 ```
 
 ## Rollback HMS to Snapshot B
