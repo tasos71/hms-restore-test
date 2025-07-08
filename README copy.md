@@ -6,6 +6,9 @@ The following scenario will be tested by going through the steps documented belo
 
 ## Preparation of environment
 
+```
+source ./env.sh
+```
 
 ```bash
 cd $DATAPLATFORM_HOME
@@ -37,6 +40,13 @@ Create the Kafka Audit Log topic
 docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic minio-audit-log
 docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic hms.notification.v1
 ```
+
+in separate terminal run
+
+```bash
+kcat -q -u -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081 | jq
+```
+
 
 ```bash
 cd $PYTEST_HOME
@@ -90,35 +100,16 @@ cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/1
 pytest src/hms_backup_restore_2.py --verbose
 ```
 
-**Backup Minio**
-
-```bash
-cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/2
-```
-
 ## Handle period 3
 
 ```bash
 pytest src/hms_backup_restore_3.py --verbose
 ```
 
-**Backup Minio**
-
-```bash
-cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/3
-```
-
-
 ## Handle period 4
 
 ```bash
 pytest src/hms_backup_restore_4.py --verbose
-```
-
-**Backup Minio**
-
-```bash
-cp -R ../platys-hms/container-volume/minio/ ../platys-hms/backup/4
 ```
 
 ## Handle Period 5
@@ -519,6 +510,14 @@ returns an error, as the table `flights_per_carrier_t` has been created **after*
 db.flights_per_carrier_t" 
 Query 20250707_093733_00042_mup4g failed: line 1:22: Table 'minio.flight_db.flights_per_carrier_t' does not exist
 select count(*) from minio.flight_db.flights_per_carrier_t
+```
+
+```bash
+kcat -q -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081
+
+kcat -q -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081 | jq
+
+kcat -q -b localhost:9092 -t hms.notification.v1 -s value=avro -r http://localhost:8081 | jq .eventType
 ```
 
 ## Rollback HMS to Snapshot B
