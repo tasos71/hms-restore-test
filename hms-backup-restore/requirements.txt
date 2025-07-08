@@ -1,0 +1,8 @@
+pytest
+sqlalchemy
+psycopg2-binary
+pytest-html
+pytest-md
+pytest-order
+sqlalchemy-trino
+docker

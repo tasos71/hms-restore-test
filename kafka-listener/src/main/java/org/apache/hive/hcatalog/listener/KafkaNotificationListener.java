@@ -1305,14 +1305,6 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
       } catch (ExecutionException e) {
           throw new RuntimeException(e);
       }
-      // HMSHandler.getMSForConf(conf).addNotificationEvent(event);
-
-    // Set the DB_NOTIFICATION_EVENT_ID for future reference by other listeners.
-    if (event.isSetEventId()) {
-      listenerEvent.putParameter(
-          MetaStoreEventListenerConstants.DB_NOTIFICATION_EVENT_ID_KEY_NAME,
-          Long.toString(event.getEventId()));
-    }
   }
 
   private final static String TOPIC = "hms.notification.v1";

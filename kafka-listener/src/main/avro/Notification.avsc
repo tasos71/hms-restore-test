@@ -1,0 +1,36 @@
+{
+  "type": "record",
+  "name": "KafkaNotificationEvent",
+  "namespace": "org.apache.hive.hcatalog.metastore",
+  "fields": [
+    {
+      "name": "eventId",
+      "type": "long"
+    },
+    {
+      "name": "eventTime",
+      "type": "long"
+    },
+    {
+      "name": "eventType",
+      "type": "string"
+    },
+    {
+      "name": "dbName",
+      "type": "string"
+    },
+    {
+      "name": "tableName",
+      "type": ["null", "string"],
+      "default": null
+    },
+    {
+      "name": "message",
+      "type": "string"
+    },
+    {
+      "name": "messageFormat",
+      "type": "string"
+    }
+  ]
+}

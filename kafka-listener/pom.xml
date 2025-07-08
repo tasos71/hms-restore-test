@@ -7,8 +7,8 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>com.example.hive</groupId>
-  <artifactId>hive-metastore-kafka-listener</artifactId>
-  <version>1.0.0</version>
+  <artifactId>hms-kafka-listener</artifactId>
+  <version>0.1.0</version>
   <packaging>jar</packaging>
 
   <name>Hive Metastore Kafka Listener</name>
@@ -18,7 +18,8 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <hive.version>4.0.1</hive.version> <!-- Use your Hive version -->
-    <kafka.clients.version>3.5.1</kafka.clients.version> <!-- Or latest Kafka client -->
+    <kafka.clients.version>3.8.0</kafka.clients.version> <!-- Or latest Kafka client -->
+    <confluent.version>7.8.0</confluent.version>
   </properties>
 
   <dependencies>
@@ -31,40 +32,12 @@
     </dependency>
 
     <dependency>
-      <groupId>org.apache.hive</groupId>
-      <artifactId>hive-common</artifactId>
+      <groupId>org.apache.hive.hcatalog</groupId>
+      <artifactId>hive-hcatalog-server-extensions</artifactId>
       <version>${hive.version}</version>
       <scope>provided</scope> <!-- provided because Hive server provides it -->
     </dependency>
 
-    <dependency>
-      <groupId>org.apache.hive</groupId>
-      <artifactId>hive-exec</artifactId>
-      <version>${hive.version}</version>
-      <scope>provided</scope> <!-- provided because Hive server provides it -->
-    </dependency>
-
-    <dependency>
-        <groupId>org.apache.hive</groupId>
-        <artifactId>hive-service</artifactId>
-        <version>${hive.version}</version>
-        <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-        <groupId>org.apache.hive.hcatalog</groupId>
-        <artifactId>hive-hcatalog-core</artifactId>
-        <version>${hive.version}</version>
-        <scope>provided</scope>
-    </dependency>
-
-    <!-- Hadoop Common (required by Hive Metastore) -->
-    <dependency>
-      <groupId>org.apache.hadoop</groupId>
-      <artifactId>hadoop-common</artifactId>
-      <version>3.3.4</version> <!-- Match your Hadoop version -->
-      <scope>provided</scope>
-    </dependency>
 
     <!-- Kafka Clients -->
     <dependency>
@@ -73,18 +46,48 @@
       <version>${kafka.clients.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>1.11.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.confluent</groupId>
+      <artifactId>kafka-avro-serializer</artifactId>
+      <version>${confluent.version}</version>
+    </dependency>
+
     <!-- Logging (optional but recommended) -->
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>2.0.9</version>
     </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-log4j12</artifactId>
-      <version>2.0.9</version>
-    </dependency>
+
   </dependencies>
+
+	<repositories>
+		<repository>
+			<id>github-releases</id>
+			<url>http://oss.sonatype.org/content/repositories/github-releases/</url>
+		</repository>
+		<repository>
+			<id>clojars.org</id>
+			<url>http://clojars.org/repo</url>
+		</repository>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</pluginRepository>
+	</pluginRepositories>
 
   <build>
     <plugins>
@@ -99,31 +102,47 @@
         </configuration>
       </plugin>
 
-      <!-- Shade plugin to create a fat jar if needed -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.5.0</version>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals><goal>shade</goal></goals>
-            <configuration>
-              <createDependencyReducedPom>false</createDependencyReducedPom>
-              <filters>
-                <filter>
-                  <artifact>*:*</artifact>
-                  <excludes>
-                    <exclude>META-INF/*.SF</exclude>
-                    <exclude>META-INF/*.DSA</exclude>
-                    <exclude>META-INF/*.RSA</exclude>
-                  </excludes>
-                </filter>
-              </filters>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
+
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.4.1</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>shade</goal>
+                </goals>
+                <configuration>
+                  <createDependencyReducedPom>true</createDependencyReducedPom>
+                  <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                      <mainClass>org.apache.hive.hcatalog.listener.KafkaNotificationListener</mainClass>
+                    </transformer>
+                  </transformers>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+
+
+    <plugin>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-maven-plugin</artifactId>
+      <version>1.11.1</version> <!-- Use a version matching your Avro dependency -->
+      <executions>
+        <execution>
+          <phase>generate-sources</phase>
+          <goals>
+            <goal>schema</goal>
+          </goals>
+          <configuration>
+            <sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
+            <outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
 
     </plugins>
   </build>
