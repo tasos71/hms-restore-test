@@ -3,3 +3,10 @@
 /db-compare/junitresult
 /hms-backup-restore/venv
 /kafka-listener/target
+/db-compare/__pycache__
+/db-compare/assets
+db-compare/.DS_Store
+/hms-backup-restore/__pycache__
+/hms-backup-restore/src/__pycache__
+/kafka-listener/.idea
+/platys-hms/data-transfer

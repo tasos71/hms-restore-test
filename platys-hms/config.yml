@@ -232,7 +232,7 @@
       #
       # ===== Schema Registry ========
       #
-      SCHEMA_REGISTRY_enable: false
+      SCHEMA_REGISTRY_enable: true
       # either "confluent", "apicurio"
       SCHEMA_REGISTRY_flavour: confluent
       SCHEMA_REGISTRY_nodes: 1
@@ -638,13 +638,16 @@
       #
       # ===== Apache Hive ========
       #
-      HIVE_SERVER_enable: false
+      HIVE_SERVER_enable: true
+      HIVE_SERVER_version: 4.0.1      
       #
       # ===== Apache Hive Metastore ========
       #
       HIVE_METASTORE_enable: true
+      HIVE_METASTORE_version: 4.0.1
       HIVE_METASTORE_transactional_event_listener_enabled: true
-      HIVE_METASTORE_transactional_event_listeners: 'org.apache.hive.hcatalog.listener.DbNotificationListener'
+      HIVE_METASTORE_transactional_event_listeners: 'org.apache.hive.hcatalog.listener.KafkaNotificationListener,org.apache.hive.hcatalog.listener.DbNotificationListener'
+      HIVE_METASTORE_plugin_jars: 'hms-kafka-listener-0.1.0.jar'
       HIVE_METASTORE_volume_map_data: false
       # one of 'derby' or 'postgres'
       HIVE_METASTORE_db_type: postgres
