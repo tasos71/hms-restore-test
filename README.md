@@ -33,6 +33,7 @@ Create the Kafka Audit Log topic
 
 ```bash
 docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic minio-audit-log
+docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic hms.notification.v1
 ```
 
 **Create Hive Metastore Table**
