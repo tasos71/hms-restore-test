@@ -112,7 +112,7 @@ PARTITIONED BY (year integer, month integer)
 STORED AS parquet
 LOCATION 's3a://flight-bucket/refined/flights';
 
-!qui
+!quit
 ```
 
 Using Trino
