@@ -112,7 +112,7 @@ PARTITIONED BY (year integer, month integer)
 STORED AS parquet
 LOCATION 's3a://flight-bucket/refined/flights';
 
-!quit;
+!qui
 ```
 
 Using Trino
@@ -366,7 +366,7 @@ CREATE EXTERNAL TABLE flights_per_carrier_t (
 STORED AS PARQUET
 LOCATION 's3a://flight-bucket/refined/flights-per-carrier';
 
-!quit;
+!quit
 ```
 
 ```sql
