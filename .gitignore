@@ -10,3 +10,4 @@ db-compare/.DS_Store
 /hms-backup-restore/src/__pycache__
 /kafka-listener/.idea
 /platys-hms/data-transfer
+/platys-hms/backup
