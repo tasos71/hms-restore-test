@@ -91,6 +91,7 @@ TBLPROPERTIES (
   "skip.header.line.count" = "1"
 );
 
+DROP TABLE IF EXISTS flights_t;
 CREATE EXTERNAL TABLE flights_t ( dayOfMonth integer
                              , dayOfWeek integer
                              , depTime integer
