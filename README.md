@@ -1081,3 +1081,162 @@ docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --exe
 returns `1175001`
 
 
+## Performance Testing "Repair"
+
+ * `hms_loadtest_base.py` - base functions for all other scripts
+ * `hms_loadtest_create_tabeles.py` - create the configured number of `flights_n_t` tables
+ * `hms_loadtest_upload_data.py` - uploads a configurable number of partitions into the `flights_n_t` tables
+ * `hms_loadtest_remove_partitions.py`
+ * `hms_loadtest_repair.py`
+
+### `30'000` objects
+
+```bash
+cd $PYTEST_HOME
+pytest src/hms_backup_restore_loadtest.py --verbose
+```
+
+```bash
+docker exec -ti hive-server beeline -u jdbc:hive2://hive-server:10000 -e "SHOW PARTITIONS flight_db.flights_t;"
+```
+
+```bash
+time docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
+```
+guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/platys-hms (main)> time docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+CALL
+
+________________________________________________________
+Executed in   93.17 secs      fish           external
+   usr time   10.46 millis    0.19 millis   10.27 millis
+   sys time   10.11 millis    1.08 millis    9.03 millis
+```
+
+### `60'000` objects
+
+```bash
+time docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
+```bash
+--execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+CALL
+
+________________________________________________________
+Executed in  230.24 secs      fish           external
+   usr time   15.42 millis    0.42 millis   15.00 millis
+   sys time   22.62 millis    3.20 millis   19.42 millis
+```
+
+----
+Remove the last 10 partitions in Mino assuming that we have restored a newer Hive Metastore DB snapshot.
+
+Time the "repair" operation
+
+```bash
+time docker exec -ti trino-cli trino --server http://trino-1:8080  --user trino --execute "call minio.system.sync_partition_metadata('flight_db', 'flights_t', 'FULL')"
+```
+
+
+### `1000` tables with `12` partitions with `5` objects each - `60'000` objects
+
+#### How long does it take to repair all of them if the table is "just empty"?
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in  278.23 secs    fish           external
+   usr time    6.81 secs    0.39 millis    6.81 secs
+   sys time    1.54 secs    3.09 millis    1.53 secs
+```
+
+
+#### How long does it take to repair if for all `1000` tables `3` partitions each are missing?
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_remove_partitions
+
+________________________________________________________
+Executed in   95.75 secs    fish           external
+   usr time   10.21 secs    0.18 millis   10.21 secs
+   sys time    1.84 secs    1.47 millis    1.84 secs
+```
+
+### `1000` tables with `24` partitions with `5` objects each - `120'000` objects
+
+
+#### How long does it take to repair all of them if the table is "just empty"?
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in  555.77 secs    fish           external
+   usr time    6.79 secs    0.16 millis    6.79 secs
+   sys time    1.63 secs    1.36 millis    1.63 secs
+```
+
+
+#### How long does it take to repair if for all `1000` tables `3` partitions each are missing?
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   49.08 secs    fish           external
+   usr time    6.02 secs    0.21 millis    6.02 secs
+   sys time    1.17 secs    1.48 millis    1.16 secs
+```
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   60.60 secs    fish           external
+   usr time    6.07 secs    0.18 millis    6.07 secs
+   sys time    1.24 secs    1.40 millis    1.23 secs
+```
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   53.41 secs    fish           external
+   usr time    6.51 secs    0.18 millis    6.51 secs
+   sys time    1.38 secs    1.29 millis    1.38 secs
+```
+
+
+#### How long does it take to repair it for all `1000` tables if `3` partitions are additionally available?
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   52.59 secs    fish           external
+   usr time    6.43 secs    0.18 millis    6.43 secs
+   sys time    1.54 secs    1.30 millis    1.53 secs
+```
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/platys-hms (main) [0|1]> cd $PYTEST_HOME
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   64.24 secs    fish           external
+   usr time    7.17 secs    0.19 millis    7.17 secs
+   sys time    1.79 secs    1.48 millis    1.79 secs
+```
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   65.14 secs    fish           external
+   usr time    6.53 secs    0.17 millis    6.53 secs
+   sys time    1.74 secs    1.20 millis    1.74 secs
+```
+
