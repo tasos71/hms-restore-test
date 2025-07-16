@@ -1084,10 +1084,10 @@ returns `1175001`
 ## Performance Testing "Repair"
 
  * `hms_loadtest_base.py` - base functions for all other scripts
- * `hms_loadtest_create_tabeles.py` - create the configured number of `flights_n_t` tables
+ * `hms_loadtest_create_tabeles.py` - creates the configured number of `flights_n_t` tables
  * `hms_loadtest_upload_data.py` - uploads a configurable number of partitions into the `flights_n_t` tables
- * `hms_loadtest_remove_partitions.py`
- * `hms_loadtest_repair.py`
+ * `hms_loadtest_remove_partitions.py` - remove a configurable number of partitions from the "end" of the table
+ * `hms_loadtest_repair.py` - runs the Trino HMS repair operation for all tables
 
 ### `30'000` objects
 
