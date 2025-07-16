@@ -1157,12 +1157,12 @@ Executed in  278.23 secs    fish           external
 #### How long does it take to repair if for all `1000` tables `3` partitions each are missing?
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_remove_partitions
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   95.75 secs    fish           external
-   usr time   10.21 secs    0.18 millis   10.21 secs
-   sys time    1.84 secs    1.47 millis    1.84 secs
+Executed in   79.85 secs    fish           external
+   usr time    7.23 secs    0.19 millis    7.23 secs
+   sys time    1.82 secs    1.38 millis    1.82 secs
 ```
 
 ### `1000` tables with `24` partitions with `5` objects each - `120'000` objects
