@@ -1165,6 +1165,12 @@ Executed in   79.85 secs    fish           external
    sys time    1.82 secs    1.38 millis    1.82 secs
 ```
 
+#### How long does it take to repair if for all `1000` tables `3` partitions each are missing?
+
+```bash
+
+```
+
 ### `1000` tables with `24` partitions with `5` objects each - `120'000` objects
 
 
