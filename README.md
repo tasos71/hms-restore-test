@@ -1086,7 +1086,8 @@ returns `1175001`
  * `hms_loadtest_base.py` - base functions for all other scripts
  * `hms_loadtest_create_tabeles.py` - creates the configured number of `flights_n_t` tables
  * `hms_loadtest_upload_data.py` - uploads a configurable number of partitions into the `flights_n_t` tables
- * `hms_loadtest_remove_partitions.py` - remove a configurable number of partitions from the "end" of the table
+ * `hms_loadtest_remove_objects.py` - remove a configurable number of objects from the "end" of the table
+ * `hms_loadtest_remove_partitions.py` - remove a the last partition from the "end" of the table
  * `hms_loadtest_repair.py` - runs the Trino HMS repair operation for all tables
 
 ### `30'000` objects
@@ -1154,7 +1155,7 @@ Executed in  278.23 secs    fish           external
 ```
 
 
-#### How long does it take to repair if for all `1000` tables `3` partitions each are missing?
+#### How long does it take to repair if for all `1000` tables `3` objects each in the last partition are missing?
 
 ```bash
 (venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
@@ -1165,10 +1166,26 @@ Executed in   79.85 secs    fish           external
    sys time    1.82 secs    1.38 millis    1.82 secs
 ```
 
-#### How long does it take to repair if for all `1000` tables `3` partitions each are missing?
+#### How long does it take to repair if for all `1000` tables `3` objects each in the last partition are missing?
+
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in   77.78 secs    fish           external
+   usr time    7.86 secs    0.23 millis    7.85 secs
+   sys time    2.11 secs    1.97 millis    2.11 secs
+```
+
+#### How long does it take to repair if for all `1000` tables `1` partition each are missing?
 
 ```bash
 
+```
+
+#### How long does it take to repair if for all `1000` tables `1` partition each are missing?
+
+```bash
 ```
 
 ### `1000` tables with `24` partitions with `5` objects each - `120'000` objects
