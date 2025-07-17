@@ -7,9 +7,6 @@ The following scenario will be tested by going through the steps documented belo
 ## Preparation of environment
 
 ```bash
-sudo rm -R backup
-mkdir -p backup
-
 docker compose down
 docker volume prune -f
 
