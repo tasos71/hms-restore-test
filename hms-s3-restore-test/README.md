@@ -4,6 +4,8 @@ The following scenario will be tested by going through the steps documented belo
 
 ![](./images/scenario.png)
 
+Most of the steps are automated using [pytest](https://docs.pytest.org/en/stable/) to simplify re-running it. A script with the statements previously executed manually can be found [here](./README-before-test-automation.md).
+
 ## Preparation of environment
 
 ```
