@@ -207,63 +207,60 @@ Executed in  563.54 secs    fish           external
 ### (2) How long does it take to repair if for all `1000` tables `3` objects each in the last partition are missing?
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   49.08 secs    fish           external
-   usr time    6.02 secs    0.21 millis    6.02 secs
-   sys time    1.17 secs    1.48 millis    1.16 secs
+Executed in   42.61 secs    fish           external
+   usr time    6.45 secs    0.30 millis    6.45 secs
+   sys time    1.26 secs    2.31 millis    1.26 secs
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   60.60 secs    fish           external
-   usr time    6.07 secs    0.18 millis    6.07 secs
-   sys time    1.24 secs    1.40 millis    1.23 secs
+Executed in   59.45 secs    fish           external
+   usr time    6.89 secs    0.20 millis    6.89 secs
+   sys time    1.69 secs    1.70 millis    1.69 secs
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   53.41 secs    fish           external
-   usr time    6.51 secs    0.18 millis    6.51 secs
-   sys time    1.38 secs    1.29 millis    1.38 secs
+Executed in   47.27 secs    fish           external
+   usr time    6.50 secs    0.18 millis    6.50 secs
+   sys time    1.44 secs    1.32 millis    1.44 secs
 ```
-
 
 ### (3) How long does it take to repair if for all `1000` tables `3` objects each in the last partition are missing?
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   52.59 secs    fish           external
-   usr time    6.43 secs    0.18 millis    6.43 secs
-   sys time    1.54 secs    1.30 millis    1.53 secs
+Executed in   46.59 secs    fish           external
+   usr time    6.35 secs    0.20 millis    6.35 secs
+   sys time    1.38 secs    1.44 millis    1.38 secs
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/platys-hms (main) [0|1]> cd $PYTEST_HOME
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   64.24 secs    fish           external
-   usr time    7.17 secs    0.19 millis    7.17 secs
-   sys time    1.79 secs    1.48 millis    1.79 secs
+Executed in   62.90 secs    fish           external
+   usr time    6.15 secs    0.20 millis    6.15 secs
+   sys time    1.54 secs    1.28 millis    1.54 secs
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
-Executed in   65.14 secs    fish           external
-   usr time    6.53 secs    0.17 millis    6.53 secs
-   sys time    1.74 secs    1.20 millis    1.74 secs
+Executed in   50.12 secs    fish           external
+   usr time    6.84 secs    0.17 millis    6.84 secs
+   sys time    1.65 secs    1.25 millis    1.65 secs
 ```
-
 
 ### (4) How long does it take to repair if for all `1000` tables `1` partition each are missing?
 
