@@ -1,4 +1,5 @@
 import sys
+import os
 from thrift.transport import TSocket, TTransport
 from thrift.protocol import TBinaryProtocol
 
@@ -6,10 +7,13 @@ sys.path.append('gen-py')
 
 from hive_metastore import ThriftHiveMetastore
 
+# Read connection details from environment variables
+HMS_HOST = os.getenv('HMS_HOST', 'localhost')
+HMS_PORT = os.getenv('HMS_PORT', '9083')
 
 def getClient():
     # Connect
-    transport = TSocket.TSocket('localhost', 9083)  # change to your metastore host
+    transport = TSocket.TSocket(HMS_HOST, HMS_PORT)  # change to your metastore host
     transport = TTransport.TBufferedTransport(transport)
     protocol = TBinaryProtocol.TBinaryProtocol(transport)
     client = ThriftHiveMetastore.Client(protocol)
