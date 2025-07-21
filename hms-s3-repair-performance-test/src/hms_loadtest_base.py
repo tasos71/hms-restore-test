@@ -93,7 +93,7 @@ def remove_object(year, month, table_num, nof):
 def remove_partition(year, month, table_num):
     # Run a temporary container (e.g., alpine echo)
     output = client.containers.get('minio-mc').exec_run(
-        cmd=f"mc rm -r --force minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}",
+        cmd=f"mc rm --recursive --force --versions minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/",
     )
 
     return output

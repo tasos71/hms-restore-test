@@ -31,7 +31,7 @@ client = docker.from_env()
 
 def loadtest_repair():        
     # Upload no repair the data
-    for table_num in range(1, 1000):
+    for table_num in range(0, 1000):
         hms_loadtest_base.do_trino_repair(table_num)
 
 loadtest_repair()

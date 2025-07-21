@@ -42,7 +42,6 @@ def get_hms_partitions_count(s3_location: str, epoc_timestamp: int):
                 SELECT p."TBL_ID",
                     COUNT(*) AS partition_count
                 FROM public."PARTITIONS" p
-                WHERE p."CREATE_TIME" <= {epoc_timestamp}
                 GROUP BY p."TBL_ID"
             ) p
             JOIN (
