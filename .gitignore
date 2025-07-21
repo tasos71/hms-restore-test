@@ -11,6 +11,8 @@ db-compare/.DS_Store
 /kafka-listener/.idea
 /platys-hms/data-transfer
 /platys-hms/backup
+/platys-hms/performance-test-base
 /platys-hms/container-volume
 /hive-metastore-python/gen-py
 
+/hms-s3-compare-partitions/venv
