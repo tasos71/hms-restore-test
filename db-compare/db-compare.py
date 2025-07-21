@@ -6,14 +6,14 @@ from sqlalchemy import create_engine, text, inspect
 # Read connection details from environment variables
 SRC_USER = os.getenv('SRC_DB_USER', 'hive')
 SRC_PASSWORD = os.getenv('SRC_DB_PASSWORD', 'abc123!')
-SRC_HOST = os.getenv('SRC_DB_HOST', 'localhost')
-SRC_PORT = os.getenv('SRC_DB_PORT', '5442')
+SRC_HOST = os.getenv('SRC_DB_HOST', 'hive-metastore-db')
+SRC_PORT = os.getenv('SRC_DB_PORT', '5432')
 SRC_DBNAME = os.getenv('SRC_DB_NAME', 'metastore_db')
 
 TGT_USER = os.getenv('TGT_DB_USER', 'hive')
 TGT_PASSWORD = os.getenv('TGT_DB_PASSWORD', 'abc123!')
-TGT_HOST = os.getenv('TGT_DB_HOST', 'localhost')
-TGT_PORT = os.getenv('TGT_DB_PORT', '5442')
+TGT_HOST = os.getenv('TGT_DB_HOST', 'hive-metastore-db')
+TGT_PORT = os.getenv('TGT_DB_PORT', '5432')
 TGT_DBNAME = os.getenv('TGT_DB_NAME', 'metastore_db')
 
 # Construct connection URLs
