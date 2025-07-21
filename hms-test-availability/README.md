@@ -14,6 +14,13 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+## Generate Thrift objects
+
+```bash
+thrift --gen py thrift_defs/share/fb303/if/fb303.thrift
+thrift --gen py thrift_defs/hive_metastore.thrift
+```
+
 ## Run the tests
 
 Set environment variables
