@@ -1,0 +1,7 @@
+pytest
+sqlalchemy
+psycopg2-binary
+pytest-html
+pytest-md
+pandas
+boto3
