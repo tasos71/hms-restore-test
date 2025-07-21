@@ -15,4 +15,8 @@ Add the `LENSES_BOX_license` property with the license information you have gott
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:3030> and login with admin/admin.
+=======
+Navigate to <http://10.156.72.251:3030> and login with admin/admin.
+>>>>>>> Stashed changes

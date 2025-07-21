@@ -71,7 +71,11 @@ docker exec -ti awscli aws s3 cp /data-transfer/flight-data/airports.csv s3://gs
 
 ## Work with data from external S3 with Spark
 
+<<<<<<< Updated upstream
 Navigate to Zeppelin <http://192.168.1.112:28080> and login as user `admin` with password `changeme`.
+=======
+Navigate to Zeppelin <http://10.156.72.251:28080> and login as user `admin` with password `changeme`.
+>>>>>>> Stashed changes
 
 Create a new notebook and in a cell enter the following Spark code using the Python API. Replace again the `gschmutz` prefix in the bucket name:
 

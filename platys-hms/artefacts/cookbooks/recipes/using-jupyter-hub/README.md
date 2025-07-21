@@ -48,5 +48,9 @@ docker-compose up -d
  
 ## Using JupyterHub
 
+<<<<<<< Updated upstream
 Navigate to JupyterHub on <http://192.168.1.112:28284>. 
+=======
+Navigate to JupyterHub on <http://10.156.72.251:28284>. 
+>>>>>>> Stashed changes
 

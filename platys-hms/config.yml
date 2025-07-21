@@ -497,7 +497,7 @@
       #
       # ===== Apache Spark ========
       #
-      SPARK_enable: true
+      SPARK_enable: false
       # either 3.3 or 3.4 or 3.5
       SPARK_base_version: 3.5
       # "hive" or "in-memory"
@@ -1135,7 +1135,7 @@
       #
       # ===== Zeppelin ========
       #
-      ZEPPELIN_enable: true
+      ZEPPELIN_enable: false
       ZEPPELIN_volume_map_data: false
       ZEPPELIN_admin_username: admin
       ZEPPELIN_admin_password: changeme
@@ -1161,7 +1161,7 @@
       JUPYTER_requirements_file: ''
       JUPYTER_spark_jars_packages: ''
       JUPYTER_tokenless: false
-      JUPYTER_token: ''
+      JUPYTER_token: 'abc123!'
       JUPYTER_nb_user: ''
       # JUPYTER_notebook_args: '--log-level='DEBUG' --dev-mode'
       JUPYTER_notebook_args: ''

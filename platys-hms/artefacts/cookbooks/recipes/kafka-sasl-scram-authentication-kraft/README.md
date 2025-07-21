@@ -44,11 +44,19 @@ docker-compose up -d
 
 ## AKHQ
 
+<<<<<<< Updated upstream
 Navigate to AKHQ on <http://192.168.1.112:28107>.
 
 ## KaDeck
 
 Navigate to KaDeck on <http://192.168.1.112:28313>, login as user `admin` with password `admin` and accept the license information.
+=======
+Navigate to AKHQ on <http://10.156.72.251:28107>.
+
+## KaDeck
+
+Navigate to KaDeck on <http://10.156.72.251:28313>, login as user `admin` with password `admin` and accept the license information.
+>>>>>>> Stashed changes
 
 Click on **+ Add Connection** and on the pop-up dialog, select **Apache Kafka** and click **Next**.
 

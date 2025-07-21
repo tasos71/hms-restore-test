@@ -15,7 +15,11 @@ platys gen
 
 ### Web UI
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28393>.
+=======
+Navigate to <http://10.156.72.251:28393>.
+>>>>>>> Stashed changes
 
 ### Unity Catalog CLI
 

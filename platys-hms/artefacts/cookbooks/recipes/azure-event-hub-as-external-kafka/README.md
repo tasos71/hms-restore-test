@@ -53,7 +53,11 @@ docker-compose up -d
 
 ## Use the Platform
 
+<<<<<<< Updated upstream
 Navigate to AKHQ to manage the Event Hub: <http://192.168.1.112:28107>
+=======
+Navigate to AKHQ to manage the Event Hub: <http://10.156.72.251:28107>
+>>>>>>> Stashed changes
 
 To use the Kafka CLI's
 

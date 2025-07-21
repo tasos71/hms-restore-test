@@ -19,4 +19,8 @@ Before you use the UI for the first time, you need to create the admin user, usi
 docker exec -it web-protege java -jar /webprotege-cli.jar create-admin-account
 ```
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28368>.
+=======
+Navigate to <http://10.156.72.251:28368>.
+>>>>>>> Stashed changes

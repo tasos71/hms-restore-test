@@ -13,4 +13,8 @@ platys gen
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28158> and enter `admin` into the **User** and `1234`into the **Password** field.
+=======
+Navigate to <http://10.156.72.251:28158> and enter `admin` into the **User** and `1234`into the **Password** field.
+>>>>>>> Stashed changes

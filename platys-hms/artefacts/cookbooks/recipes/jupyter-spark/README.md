@@ -60,7 +60,11 @@ total 57056
  
 ## Using Jupyter to read the Airports.avro file
 
+<<<<<<< Updated upstream
 Navigate to Jupyter on <http://192.168.1.112:28888>. 
+=======
+Navigate to Jupyter on <http://10.156.72.251:28888>. 
+>>>>>>> Stashed changes
 
 Enter `abc123!` into the **Password or token** field and click on **Log in**:
 

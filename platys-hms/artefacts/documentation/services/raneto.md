@@ -13,7 +13,11 @@ platys gen
 
 ### How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28311> 
+=======
+Navigate to <http://10.156.72.251:28311> 
+>>>>>>> Stashed changes
 
 Login with user `admin` and password `password`. 
 

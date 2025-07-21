@@ -13,6 +13,12 @@ platys gen
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:8161> for the ActiveMQ dashboard.
 
 To manage the ActiveMQ server, navigate to <http://192.168.1.112:8161/admin/> and use `admin` for the user and `admin` for the password when asked for.
+=======
+Navigate to <http://10.156.72.251:8161> for the ActiveMQ dashboard.
+
+To manage the ActiveMQ server, navigate to <http://10.156.72.251:8161/admin/> and use `admin` for the user and `admin` for the password when asked for.
+>>>>>>> Stashed changes

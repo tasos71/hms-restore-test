@@ -56,4 +56,8 @@ Now start the platform
 docker-compose up -d
 ```
 
+<<<<<<< Updated upstream
 and once it is running navigate to the NiFi UI: <https://192.168.1.112:18080/nifi>.
+=======
+and once it is running navigate to the NiFi UI: <https://10.156.72.251:18080/nifi>.
+>>>>>>> Stashed changes

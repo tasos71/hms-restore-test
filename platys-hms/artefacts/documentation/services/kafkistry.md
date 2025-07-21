@@ -17,6 +17,10 @@ platys gen
 
 ## How to use?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28303> to show the Kafkistry UI.
+=======
+Navigate to <http://10.156.72.251:28303> to show the Kafkistry UI.
+>>>>>>> Stashed changes
 
 Login as the **Admin User**: User `admin` and Password `abc123!`.

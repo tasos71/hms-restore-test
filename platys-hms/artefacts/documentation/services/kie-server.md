@@ -13,4 +13,8 @@ platys gen
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28236/business-central> or <http://192.168.1.112:28234>.
+=======
+Navigate to <http://10.156.72.251:28236/business-central> or <http://10.156.72.251:28234>.
+>>>>>>> Stashed changes

@@ -15,4 +15,8 @@ Add the Free License to `SINGLE_STORE_LICENSE`. You can [sign up](https://www.si
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28351> to run the SingleStore UI. Login with password `abc123!`.
+=======
+Navigate to <http://10.156.72.251:28351> to run the SingleStore UI. Login with password `abc123!`.
+>>>>>>> Stashed changes

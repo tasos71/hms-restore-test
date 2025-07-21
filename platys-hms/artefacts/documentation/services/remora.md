@@ -16,23 +16,39 @@ platys gen
 Show active consumers
 
 ```bash
+<<<<<<< Updated upstream
 curl http://192.168.1.112:28256/consumers
+=======
+curl http://10.156.72.251:28256/consumers
+>>>>>>> Stashed changes
 ```
 
 Show specific consumer group information
 
 ```bash
+<<<<<<< Updated upstream
 curl http://192.168.1.112:28256/consumers/<consumer-group-id>
+=======
+curl http://10.156.72.251:28256/consumers/<consumer-group-id>
+>>>>>>> Stashed changes
 ```
 
 Show health
 
 ```bash
+<<<<<<< Updated upstream
 curl http://192.168.1.112:28256/health
+=======
+curl http://10.156.72.251:28256/health
+>>>>>>> Stashed changes
 ```
 
 Metrics
 
 ```bash
+<<<<<<< Updated upstream
 curl http://192.168.1.112:28256/metrics
+=======
+curl http://10.156.72.251:28256/metrics
+>>>>>>> Stashed changes
 ```

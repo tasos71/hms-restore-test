@@ -13,7 +13,11 @@ platys gen
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28263/camunda-welcome/index.html>.
+=======
+Navigate to <http://10.156.72.251:28263/camunda-welcome/index.html>.
+>>>>>>> Stashed changes
 
 User: demo, Password: demo
 

@@ -42,7 +42,11 @@ docker-compose up -d
 
 ## Load a database into Neo4J
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:7474> and login as user `neo4j` and password `abc123abc123`.
+=======
+Navigate to <http://10.156.72.251:7474> and login as user `neo4j` and password `abc123abc123`.
+>>>>>>> Stashed changes
 
 Now load the movie graph by executing
 
@@ -58,7 +62,11 @@ The movie database is loaded into Neo4j.
 
 ## Using yFiles Graph from Jupyter
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28888> and login with the token specified above, i.e. `abc123!`.
+=======
+Navigate to <http://10.156.72.251:28888> and login with the token specified above, i.e. `abc123!`.
+>>>>>>> Stashed changes
 
 Create a new notebook and add and execute the following cells:
 

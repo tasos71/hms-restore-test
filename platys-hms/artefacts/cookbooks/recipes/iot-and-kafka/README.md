@@ -26,7 +26,11 @@ Create the `sensor-reading` topic by either
 docker exec -ti kafka-1 kafka-topics --create --zookeeper zookeeper-1:2181 --topic sensor-reading --replication-factor 1 --partitions 8
 ```
 
+<<<<<<< Updated upstream
 2. use the AKHQ utility (set `AKHQ_enable` to `true`) by browsing to <http://192.168.1.112:28107>.
+=======
+2. use the AKHQ utility (set `AKHQ_enable` to `true`) by browsing to <http://10.156.72.251:28107>.
+>>>>>>> Stashed changes
 
 ## Run the IoT Simulator
 

@@ -13,4 +13,8 @@ platys gen
 
 ## How to use it?
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28175> and login as user `cedalo` with password `abc123!`.
+=======
+Navigate to <http://10.156.72.251:28175> and login as user `cedalo` with password `abc123!`.
+>>>>>>> Stashed changes

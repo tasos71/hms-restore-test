@@ -21,5 +21,9 @@ alias adb-cli="docker exec oarcle-adb adb-cli"
 
 ### Connect through JDBC
 
+<<<<<<< Updated upstream
 * **JDBC Url:**  	`jdbc:oracle:thin:@192.168.1.112:1525/ATP`
+=======
+* **JDBC Url:**  	`jdbc:oracle:thin:@10.156.72.251:1525/ATP`
+>>>>>>> Stashed changes
 * **JDBC Driver Class Name:** 	`oracle.jdbc.driver.OracleDriver`

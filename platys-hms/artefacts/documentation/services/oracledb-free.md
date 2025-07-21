@@ -28,5 +28,9 @@ docker exec -ti oracledb-free sqlplus "user1/abc123!"@//localhost/FREEPDB1
 
 ### Connect through JDBC
 
+<<<<<<< Updated upstream
 * **JDBC Url:**  	`jdbc:oracle:thin:@192.168.1.112:1524/FREEPDB1`
+=======
+* **JDBC Url:**  	`jdbc:oracle:thin:@10.156.72.251:1524/FREEPDB1`
+>>>>>>> Stashed changes
 * **JDBC Driver Class Name:** 	`oracle.jdbc.driver.OracleDriver`

@@ -15,7 +15,11 @@ platys gen
 
 ### Web
 
+<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28367>.
+=======
+Navigate to <http://10.156.72.251:28367>.
+>>>>>>> Stashed changes
 
 ### CLI
 
