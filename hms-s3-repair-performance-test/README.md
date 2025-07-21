@@ -52,7 +52,7 @@ This test shows a setup with 1000 partitioned tables, each a year with 12 (month
 This test is based on the "empty" table not knowing of any of the partitions. 
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in  278.23 secs    fish           external
@@ -65,7 +65,7 @@ Executed in  278.23 secs    fish           external
 in this test we have removed some of the objects (3 of the last partition) and are measuring a repair operation (setting HMS backwards)
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   79.85 secs    fish           external
@@ -78,7 +78,7 @@ Executed in   79.85 secs    fish           external
 in this test we have restored the objects we have removed before (3 of the last partition) and are measuring a repair operation (setting HMS forwards)
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   77.78 secs    fish           external
@@ -89,7 +89,7 @@ Executed in   77.78 secs    fish           external
 ### (4) How long does it take to repair if for all `1000` tables `1` partition each are missing?
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   39.39 secs    fish           external
@@ -98,7 +98,7 @@ Executed in   39.39 secs    fish           external
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   41.90 secs    fish           external
@@ -107,7 +107,7 @@ Executed in   41.90 secs    fish           external
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   30.86 secs    fish           external
@@ -116,7 +116,7 @@ Executed in   30.86 secs    fish           external
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   41.29 secs    fish           external
@@ -127,7 +127,7 @@ Executed in   41.29 secs    fish           external
 ### (5) How long does it take to repair if for all `1000` tables `1` partition each are missing?
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   34.93 secs    fish           external
@@ -136,7 +136,7 @@ Executed in   34.93 secs    fish           external
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   38.34 secs    fish           external
@@ -145,7 +145,7 @@ Executed in   38.34 secs    fish           external
 ```   
 
 ```
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   46.35 secs    fish           external
@@ -154,7 +154,7 @@ Executed in   46.35 secs    fish           external
 ```
 
 ```bash
-(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-backup-restore (main)> time python -m src.hms_loadtest_repair
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
 
 ________________________________________________________
 Executed in   46.22 secs    fish           external
