@@ -195,6 +195,15 @@ Executed in  618.17 secs    fish           external
    sys time    1.56 secs    2.48 millis    1.56 secs
 ```
 
+```bash
+(venv) guido.schmutz@AMAXDKFVW0HYY ~/D/G/g/h/hms-s3-repair-performance-test (main)> time python -m src.hms_loadtest_repair
+
+________________________________________________________
+Executed in  563.54 secs    fish           external
+   usr time    6.46 secs    0.31 millis    6.46 secs
+   sys time    1.39 secs    2.78 millis    1.39 secs
+```
+
 ### (2) How long does it take to repair if for all `1000` tables `3` objects each in the last partition are missing?
 
 ```bash
