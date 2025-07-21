@@ -21,3 +21,4 @@ db-compare/.DS_Store
 **/__pycache__
 /hms-s3-restore-test/venv
 /hms-test-availability/venv
+/hms-test-availability/gen-py
