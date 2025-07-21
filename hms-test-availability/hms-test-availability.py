@@ -55,3 +55,48 @@ def test_get_tables():
 
     # Close connection
     transport.close()
+
+
+def test_create_table():
+    client, transport = getClient()
+
+    database = 'default'
+    table_name = 'test_table'
+    fields = [
+        ThriftHiveMetastore.FieldSchema(name='id', type='int', comment='ID'),
+        ThriftHiveMetastore.FieldSchema(name='name', type='string', comment='Name'),
+    ]
+    table_def = ThriftHiveMetastore.Table(
+        tableName=table_name,
+        dbName=database,
+        tableType='EXTERNAL_TABLE',
+
+        sd=ThriftHiveMetastore.StorageDescriptor(
+            cols=fields,
+            location='s3a://flight-bucket/test',
+            inputFormat='org.apache.hadoop.mapred.TextInputFormat',
+            outputFormat='org.apache.hadoop.mapred.TextInputFormat',
+            serdeInfo=ThriftHiveMetastore.SerDeInfo(
+                name='test_serde',
+                serializationLib='org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe',
+                parameters={}
+            )
+        )
+    )
+    
+    client.create_table(table_def)
+
+    # Close connection
+    transport.close()    
+
+
+def test_drop_table():
+    client, transport = getClient()
+
+    database = 'default'
+
+    table_name = 'test_table'
+    client.drop_table(database, table_name, True)
+
+    # Close connection
+    transport.close()        
