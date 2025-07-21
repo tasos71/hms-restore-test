@@ -1,0 +1,3 @@
+thriftpy2
+thrift
+pytest
