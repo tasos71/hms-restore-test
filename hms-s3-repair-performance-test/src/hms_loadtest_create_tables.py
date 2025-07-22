@@ -1,4 +1,5 @@
 import os
+import sys
 import docker
 from sqlalchemy import create_engine,text
 import timeit
@@ -29,12 +30,28 @@ trino_engine = create_engine(trino_url)
 #docker.DockerClient(base_url='tcp://127.0.0.1:2375')
 client = docker.from_env()
 
-def loadtest_create_tables():
+def loadtest_create_tables(num_tables=1000):
     # Create schema and tables
     hms_loadtest_base.create_schema()
     
-    for table_num in range(0, 1000):
+    for table_num in range(0, num_tables):
         hms_loadtest_base.create_flights_table(table_num)
 
-loadtest_create_tables()
+if __name__ == "__main__":
+    # Default number of tables
+    num_tables = 1000
+    
+    # Check if number of tables is provided as command-line argument
+    if len(sys.argv) > 1:
+        try:
+            num_tables = int(sys.argv[1])
+            print(f"Creating {num_tables} tables...")
+        except ValueError:
+            print("Error: Please provide a valid integer for the number of tables.")
+            print("Usage: python hms_loadtest_create_tables.py [number_of_tables]")
+            sys.exit(1)
+    else:
+        print(f"Creating {num_tables} tables (default)...")
+    
+    loadtest_create_tables(num_tables)
 

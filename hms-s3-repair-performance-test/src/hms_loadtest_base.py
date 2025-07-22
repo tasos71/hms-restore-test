@@ -98,6 +98,19 @@ def remove_partition(year, month, table_num):
 
     return output
 
+def remove_partition2(location, partition_name):
+    # Convert s3a:// location to minio path and construct full path
+    # Convert "s3a://flight-bucket/refined/flights_999_t" to "minio-1/flight-bucket/refined/flights_999_t"
+    minio_path = location.replace("s3a://", "minio-1/")
+    full_path = f"{minio_path}/{partition_name}/"
+    
+    # Run a temporary container (e.g., alpine echo)
+    output = client.containers.get('minio-mc').exec_run(
+        cmd=f"mc rm --recursive --force --versions {full_path}",
+    )
+
+    return output
+
 def backup_minio(period):
     # Run a temporary container (e.g., alpine echo)
 

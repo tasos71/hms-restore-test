@@ -1,4 +1,5 @@
 import os
+import sys
 import docker
 from sqlalchemy import create_engine,text
 import timeit
@@ -29,16 +30,41 @@ trino_engine = create_engine(trino_url)
 #docker.DockerClient(base_url='tcp://127.0.0.1:2375')
 client = docker.from_env()
 
-def loadtest_upload():
+def loadtest_upload(end_year=2010, num_tables=1000, num_objects=5):
     # Upload flights data
-    for table_num in range(0, 1000):
-        for year in range(2008, 2010):
-            # For each year, iterate through months
-            for month in range(1, 13):
-                # Upload 100 objects per month
-                for nof_objects in range(0, 5):
+    for year in range(2008, end_year):
+        # For each year, iterate through months
+        for month in range(1, 13):
+            for nof_objects in range(0, num_objects):
+                for table_num in range(0, num_tables):
+                # Upload objects per month
                     output = hms_loadtest_base.upload_flights(year, month, table_num, nof_objects)
                     assert 0 == int(output.exit_code), f"Failed to upload flights data for period {1} to table flights_{table_num}_t: {output.output.decode('utf-8')}"
+                    hms_loadtest_base.do_trino_repair(table_num)
 
-loadtest_upload()
-
+if __name__ == "__main__":
+    # Default values
+    end_year = 2010
+    num_tables = 1000
+    num_objects = 5
+    
+    # Parse command-line arguments
+    if len(sys.argv) > 1:
+        try:
+            end_year = int(sys.argv[1])
+            if len(sys.argv) > 2:
+                num_tables = int(sys.argv[2])
+            if len(sys.argv) > 3:
+                num_objects = int(sys.argv[3])
+        except ValueError:
+            print("Error: Please provide valid integers for the arguments.")
+            print("Usage: python hms_loadtest_upload_data.py [end_year] [num_tables] [num_objects]")
+            print("Example: python hms_loadtest_upload_data.py 2012 500 3")
+            sys.exit(1)
+    
+    print("Starting upload test with:")
+    print(f"  Year range: 2008 to {end_year-1}")
+    print(f"  Number of tables: {num_tables}")
+    print(f"  Number of objects per table/month: {num_objects}")
+    
+    loadtest_upload(end_year, num_tables, num_objects)
