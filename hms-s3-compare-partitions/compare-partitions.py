@@ -18,7 +18,7 @@ src_url = f'postgresql://{SRC_USER}:{SRC_PASSWORD}@{SRC_HOST}:{SRC_PORT}/{SRC_DB
 src_engine = create_engine(src_url)
 
 def get_s3_partitions_baseline():
-    db_baseline = pd.read_csv("baseline_metrics.csv")
+    db_baseline = pd.read_csv("baseline_s3.csv")
     return db_baseline
 
 def get_latest_timestamp(db_baseline):
@@ -72,4 +72,4 @@ partition_counts = get_s3_partitions_baseline().set_index("s3_location")["partit
 def test_partition_counts(s3_location):
     partition = get_hms_partitions_count(s3_location, max_timestamp)
     assert partition is not None, f"Expected a row for {s3_location} from HMS select query, but got None"
-    assert partition_counts[s3_location] == partition["partition_count"], f"Partition count mismatch for {s3_location}: expected {partition_counts[s3_location]}, got {partition["partition_count"]}"
+    assert partition_counts[s3_location] == partition["partition_count"], f"Partition count mismatch for {s3_location} in Hive Metastore: expected {partition_counts[s3_location]} (S3), but got {partition["partition_count"]} (HMS)"
