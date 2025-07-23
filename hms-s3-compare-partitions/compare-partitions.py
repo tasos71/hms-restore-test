@@ -76,6 +76,7 @@ def test_partition_fingerprints(s3_location):
     partition = get_hms_partitions_count_and_fingerprint(s3_location)
     assert partition is not None, f"Expected a row for {s3_location} from HMS select query, but got None"
 
+    # part_names is a comma-separated string of partition names
     fingerprint = hashlib.sha256(partition["part_names"].encode('utf-8')).hexdigest()
 
     assert partition_fingerprint[s3_location] == fingerprint, f"Partition fingerprint mismatch for {s3_location} in Hive Metastore: expected {partition_fingerprint[s3_location]} (S3), but got {fingerprint} (HMS)"
