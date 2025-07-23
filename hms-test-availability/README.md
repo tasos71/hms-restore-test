@@ -14,7 +14,7 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Generate Thrift objects
+## Generate Thrift objects (optional step, if you don't want to use the version available in `gen-py` folder)
 
 ```bash
 thrift --gen py thrift_defs/share/fb303/if/fb303.thrift
