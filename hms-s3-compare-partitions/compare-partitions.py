@@ -1,4 +1,5 @@
 import pytest
+import hashlib
 import os
 from sqlalchemy import create_engine, text, inspect
 import pandas as pd
@@ -27,20 +28,15 @@ def get_latest_timestamp(db_baseline):
 
     return latest_timestamp
 
-def get_count_by_s3_location(db_baseline, s3_location):
-    db_baseline = get_s3_partitions_baseline()['s3_location'] == s3_location
-    latest_timestamp = db_baseline['timestamp'].max()
 
-    return latest_timestamp
-
-
-def get_hms_partitions_count(s3_location: str, epoc_timestamp: int):
+def get_hms_partitions_count_and_fingerprint(s3_location: str):
     with src_engine.connect() as conn:
         result = conn.execute(text(f"""
-            SELECT t."TBL_NAME", t."TBL_TYPE", p."partition_count"
+            SELECT t."TBL_NAME", t."TBL_TYPE", p."partition_count", p."part_names"
             FROM (
                 SELECT p."TBL_ID",
-                    COUNT(*) AS partition_count
+                    COUNT(*) AS partition_count,
+                    string_agg(p."PART_NAME", ',' ORDER BY p."PART_NAME")   part_names
                 FROM public."PARTITIONS" p
                 GROUP BY p."TBL_ID"
             ) p
@@ -67,9 +63,19 @@ def quote_ident(name: str, dialect):
 s3_locations = get_s3_partitions_baseline()["s3_location"].tolist()
 max_timestamp = get_latest_timestamp(get_s3_partitions_baseline())
 partition_counts = get_s3_partitions_baseline().set_index("s3_location")["partition_count"].to_dict()
+partition_fingerprint = get_s3_partitions_baseline().set_index("s3_location")["fingerprint"].to_dict()
 
 @pytest.mark.parametrize("s3_location", s3_locations)
 def test_partition_counts(s3_location):
-    partition = get_hms_partitions_count(s3_location, max_timestamp)
+    partition = get_hms_partitions_count_and_fingerprint(s3_location)
     assert partition is not None, f"Expected a row for {s3_location} from HMS select query, but got None"
     assert partition_counts[s3_location] == partition["partition_count"], f"Partition count mismatch for {s3_location} in Hive Metastore: expected {partition_counts[s3_location]} (S3), but got {partition["partition_count"]} (HMS)"
+
+@pytest.mark.parametrize("s3_location", s3_locations)
+def test_partition_fingerprints(s3_location):
+    partition = get_hms_partitions_count_and_fingerprint(s3_location)
+    assert partition is not None, f"Expected a row for {s3_location} from HMS select query, but got None"
+
+    fingerprint = hashlib.sha256(partition["part_names"].encode('utf-8')).hexdigest()
+
+    assert partition_fingerprint[s3_location] == fingerprint, f"Partition fingerprint mismatch for {s3_location} in Hive Metastore: expected {partition_fingerprint[s3_location]} (S3), but got {fingerprint} (HMS)"
