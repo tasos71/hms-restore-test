@@ -8,7 +8,7 @@ The create, alter and drop of a table needs to be implemented as well, to also t
 ## Prepare environment
 
 ```bash
-python3.11 -m venv myenv
+python3.11 -m venv venv
 source venv/bin/activate
 
 pip install -r requirements.txt
