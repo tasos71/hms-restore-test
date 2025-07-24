@@ -1,20 +1,23 @@
 import boto3
+import os
 import hashlib
 from datetime import datetime
 from collections import defaultdict
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
-# Connect to MinIO
-s3 = boto3.client(
-    "s3",
-    endpoint_url="http://localhost:9000",
-    aws_access_key_id="admin",
-    aws_secret_access_key="abc123abc123",
-)
+# Connect to MinIO or AWS S3
+# Read endpoint URL from environment variable, default to localhost MinIO
+endpoint_url = os.getenv('S3_ENDPOINT_URL', 'http://localhost:9000')
+bucket = os.getenv('S3_BUCKET', 'flight-bucket')
+prefix = os.getenv('S3_PREFIX', 'refined')  # optionally, specify a prefix
 
-bucket = "flight-bucket"
-prefix = "refined"  # optionally, specify a base prefix
+# Create S3 client configuration
+s3_config = {"service_name": "s3"}
+if endpoint_url:
+    s3_config["endpoint_url"] = endpoint_url
+
+s3 = boto3.client(**s3_config)
 
 def get_partition_info(s3a_url):
     # Convert s3a:// to s3://

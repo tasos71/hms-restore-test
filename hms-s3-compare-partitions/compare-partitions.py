@@ -6,14 +6,14 @@ import pandas as pd
 
 
 # Read connection details from environment variables
-SRC_USER = os.getenv('SRC_DB_USER', 'hive')
-SRC_PASSWORD = os.getenv('SRC_DB_PASSWORD', 'abc123!')
-SRC_HOST = os.getenv('SRC_DB_HOST', 'hive-metastore-db')
-SRC_PORT = os.getenv('SRC_DB_PORT', '5432')
-SRC_DBNAME = os.getenv('SRC_DB_NAME', 'metastore_db')
+HMS_DB_USER = os.getenv('HMS_DB_USER', 'hive')
+HMS_DB_PASSWORD = os.getenv('HMS_DB_PASSWORD', 'abc123!')
+HMS_DB_HOST = os.getenv('HMS_DB_HOST', 'hive-metastore-db')
+HMS_DB_PORT = os.getenv('HMS_DB_PORT', '5432')
+HMS_DB_DBNAME = os.getenv('HMS_DB_NAME', 'metastore_db')
 
 # Construct connection URLs
-src_url = f'postgresql://{SRC_USER}:{SRC_PASSWORD}@{SRC_HOST}:{SRC_PORT}/{SRC_DBNAME}'
+src_url = f'postgresql://{HMS_DB_USER}:{HMS_DB_PASSWORD}@{HMS_DB_HOST}:{HMS_DB_PORT}/{HMS_DB_DBNAME}'
 
 # Setup connections
 src_engine = create_engine(src_url)
