@@ -50,16 +50,15 @@ def get_partition_info(s3a_url):
     return {
         "s3_location": s3a_url,
         "partition_count": len(partitions),
-        "timestamp": int(latest_ts.timestamp()),
-        "fingerprint": fingerprint
+        "fingerprint": fingerprint,
+        "timestamp": int(latest_ts.timestamp())
     }
-
 
 with open("baseline_s3.csv", "w") as f:
     # Print CSV header
-    print("s3_location,partition_count,timestamp,fingerprint", file=f)
+    print("s3_location,partition_count,fingerprint,timestamp", file=f)
                 
     # Iterate through Hive tables
     for table_num in range(0, 1000):
         info = get_partition_info(f"s3a://flight-bucket/refined/flights_{table_num}_t")
-        print(f"{info['s3_location']},{info['partition_count']},{info['timestamp']},{info['fingerprint']}", file=f)
+        print(f"{info['s3_location']},{info['partition_count']},{info['fingerprint']},{info['timestamp']}", file=f)
