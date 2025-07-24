@@ -29,7 +29,7 @@ def get_latest_timestamp(db_baseline):
     return latest_timestamp
 
 
-def get_hms_partitions_count_and_fingerprint(s3_location: str):
+def get_hms_partitions_count_and_fingerprint(s3_location: str, end_timestamp: int):
     with src_engine.connect() as conn:
         result = conn.execute(text(f"""
             SELECT t."TBL_NAME", t."TBL_TYPE", p."partition_count", p."part_names"
@@ -38,6 +38,7 @@ def get_hms_partitions_count_and_fingerprint(s3_location: str):
                     COUNT(*) AS partition_count,
                     string_agg(p."PART_NAME", ',' ORDER BY p."PART_NAME")   part_names
                 FROM public."PARTITIONS" p
+                WHERE p."CREATE_TIME" < {end_timestamp}                    
                 GROUP BY p."TBL_ID"
             ) p
             JOIN (
@@ -67,13 +68,13 @@ partition_fingerprint = get_s3_partitions_baseline().set_index("s3_location")["f
 
 @pytest.mark.parametrize("s3_location", s3_locations)
 def test_partition_counts(s3_location):
-    partition = get_hms_partitions_count_and_fingerprint(s3_location)
+    partition = get_hms_partitions_count_and_fingerprint(s3_location, max_timestamp)
     assert partition is not None, f"Expected a row for {s3_location} from HMS select query, but got None"
     assert partition_counts[s3_location] == partition["partition_count"], f"Partition count mismatch for {s3_location} in Hive Metastore: expected {partition_counts[s3_location]} (S3), but got {partition["partition_count"]} (HMS)"
 
 @pytest.mark.parametrize("s3_location", s3_locations)
 def test_partition_fingerprints(s3_location):
-    partition = get_hms_partitions_count_and_fingerprint(s3_location)
+    partition = get_hms_partitions_count_and_fingerprint(s3_location, max_timestamp)
     assert partition is not None, f"Expected a row for {s3_location} from HMS select query, but got None"
 
     # part_names is a comma-separated string of partition names
