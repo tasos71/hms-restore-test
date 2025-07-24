@@ -1,4 +1,11 @@
-# Database comparision using pytest
+# Database comparision using `pytest`
+
+This sub-project contains a `pytest` to compare the partitions in S3 (based on a file with the baseline) against the data in Hive Metastore Database. For each partitioned table, it does a compare of the 
+
+ * the count of partitions 
+ * fingerprint (hash value) for the concatination of the sorted list of partition names
+
+A draft version of the script for creating the baseline is available as well.
 
 ## Prepare environment
 
