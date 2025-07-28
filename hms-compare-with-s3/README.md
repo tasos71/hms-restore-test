@@ -58,6 +58,9 @@ export HMS_DB_PORT=5442
 export HMS_DB_USER=hive
 export HMS_DB_PASSWORD=<password>
 export HMS_DB_DBNAME=metastore_db
+
+export S3_BASELINE_BUCKET=admin-bucket
+export S3_BASELINE_OBJECT_NAME=baseline_s3.csv
 ```
 
 Run `pytest`
