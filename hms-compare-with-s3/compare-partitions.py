@@ -23,11 +23,12 @@ src_engine = create_engine(src_url)
 # Create a session and S3 client
 s3 = boto3.client('s3')
 
-object_key = 'baseline_s3.csv'
-
 # Connect to MinIO or AWS S3
 endpoint_url = os.getenv('S3_ENDPOINT_URL', 'http://localhost:9000')
-bucket = os.getenv('S3_ADMIN_BUCKET', 'admin-bucket')
+
+baseline_bucket = os.getenv('S3_BASELINE_BUCKET', 'admin-bucket')
+baseline_object_key = os.getenv('S3_BASELINE_OBJECT_NAME', 'baseline_s3.csv')
+
 
 # Create S3 client configuration
 s3_config = {"service_name": "s3"}
@@ -37,7 +38,7 @@ if endpoint_url:
 s3 = boto3.client(**s3_config)
 
 # Read the object
-response = s3.get_object(Bucket=bucket, Key=object_key)
+response = s3.get_object(Bucket=baseline_bucket, Key=baseline_object_key)
 
 def get_s3_partitions_baseline():
     # `response['Body'].read()` returns bytes, decode to string
@@ -74,7 +75,7 @@ def get_hms_partitions_count_and_partnames(s3_location: str, end_timestamp: int)
                     COUNT(*) AS partition_count,
                     string_agg(p."PART_NAME", ',' ORDER BY p."PART_NAME")   part_names
                 FROM public."PARTITIONS" p
-                WHERE p."CREATE_TIME" < {end_timestamp}                    
+                WHERE p."CREATE_TIME" <= {end_timestamp}                    
                 GROUP BY p."TBL_ID"
             ) p
             JOIN (
@@ -96,7 +97,7 @@ def quote_ident(name: str, dialect):
     return dialect.identifier_preparer.quote(name)
 
 
-# Dynamically get table names from the source DB
+# Dynamically get the s3 locations from the baseline file
 s3_locations = db_baseline["s3_location"].tolist()
 max_timestamp = get_latest_timestamp(db_baseline)
 partition_counts = db_baseline.set_index("s3_location")["partition_count"].to_dict()

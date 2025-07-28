@@ -52,16 +52,23 @@ avro_serializer = AvroSerializer(schema_registry_client, schema_str,to_dict=lamb
 
 producer = Producer(producer_config)
 
-def get_count(table):
+def get_count(table, timestamp_column=None):
+    
     with trino_engine.connect() as conn:
 
-        count, at_timestamp = conn.execute(text(f'SELECT COUNT(*) AS count, MAX(eventtimestamp) at_timestamp FROM "{table}"')).first()
+        if timestamp_column:
+            query = text(f'SELECT COUNT(*) AS count, MAX({timestamp_column}) as at_timestamp FROM "{table}"')
+            count, at_timestamp = conn.execute(query).first()
+        else:
+            query = text(f'SELECT COUNT(*) AS count FROM "{table}"')
+            count = conn.execute(query).scalar()
+            at_timestamp = None
     return count, at_timestamp
 
 def produce_to_kafka():
     for table_num in range(10):
         table_name = f'flights_{table_num}_t'
-        count, at_timestamp = get_count(table_name)
+        count, at_timestamp = get_count(table_name, timestamp_column='eventtimestamp')
         
         print (f"Producing count for {table_name}: {count} at {at_timestamp}")
 
@@ -80,7 +87,8 @@ def produce_to_kafka():
         producer.produce(
             topic='hms.table.metric.events.v1', 
             value=serialized_message,
-            key=table_name  # we use the table as the key for the partitioning
+            key=table_name,  # we use the table as the key for the partitioning
+            timestamp=int(time.time() * 1000)  # current system time in milliseconds
         )
 
 produce_to_kafka()        
