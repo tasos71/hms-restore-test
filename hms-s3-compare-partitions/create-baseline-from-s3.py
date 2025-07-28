@@ -59,6 +59,8 @@ with open("baseline_s3.csv", "w") as f:
     print("s3_location,partition_count,fingerprint,timestamp", file=f)
                 
     # Iterate through Hive tables
-    for table_num in range(0, 1000):
+    for table_num in range(0, 10):
         info = get_partition_info(f"s3a://flight-bucket/refined/flights_{table_num}_t")
         print(f"{info['s3_location']},{info['partition_count']},{info['fingerprint']},{info['timestamp']}", file=f)
+
+s3.upload_file("baseline_s3.csv", "admin-bucket", "baseline_s3.csv")        
