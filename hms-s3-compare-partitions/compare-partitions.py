@@ -1,8 +1,11 @@
 import pytest
 import hashlib
 import os
+import io
 from sqlalchemy import create_engine, text, inspect
 import pandas as pd
+import boto3
+
 
 # Read connection details from environment variables
 HMS_DB_USER = os.getenv('HMS_DB_USER', 'hive')
@@ -17,12 +20,47 @@ src_url = f'postgresql://{HMS_DB_USER}:{HMS_DB_PASSWORD}@{HMS_DB_HOST}:{HMS_DB_P
 # Setup connections
 src_engine = create_engine(src_url)
 
+# Create a session and S3 client
+s3 = boto3.client('s3')
+
+object_key = 'baseline_s3.csv'
+
+# Connect to MinIO or AWS S3
+endpoint_url = os.getenv('S3_ENDPOINT_URL', 'http://localhost:9000')
+bucket = os.getenv('S3_ADMIN_BUCKET', 'admin-bucket')
+
+# Create S3 client configuration
+s3_config = {"service_name": "s3"}
+if endpoint_url:
+    s3_config["endpoint_url"] = endpoint_url
+
+s3 = boto3.client(**s3_config)
+
+# Read the object
+response = s3.get_object(Bucket=bucket, Key=object_key)
+
 def get_s3_partitions_baseline():
-    db_baseline = pd.read_csv("baseline_s3.csv")
+    # `response['Body'].read()` returns bytes, decode to string
+    csv_string = response['Body'].read().decode('utf-8')
+
+    # Debug: print the content
+    print(f"CSV content length: {len(csv_string)}")
+    print(f"First 100 chars: {csv_string[:100]}")
+
+    # Add error handling
+    if not csv_string.strip():
+        raise ValueError("CSV file is empty")
+
+    # Wrap the string in a StringIO buffer
+    csv_buffer = io.StringIO(csv_string)
+
+    db_baseline = pd.read_csv(csv_buffer)
     return db_baseline
 
+db_baseline = get_s3_partitions_baseline()
+
 def get_latest_timestamp(db_baseline):
-    db_baseline = get_s3_partitions_baseline()
+    
     latest_timestamp = db_baseline['timestamp'].max()
 
     return latest_timestamp
@@ -59,10 +97,10 @@ def quote_ident(name: str, dialect):
 
 
 # Dynamically get table names from the source DB
-s3_locations = get_s3_partitions_baseline()["s3_location"].tolist()
-max_timestamp = get_latest_timestamp(get_s3_partitions_baseline())
-partition_counts = get_s3_partitions_baseline().set_index("s3_location")["partition_count"].to_dict()
-partition_fingerprint = get_s3_partitions_baseline().set_index("s3_location")["fingerprint"].to_dict()
+s3_locations = db_baseline["s3_location"].tolist()
+max_timestamp = get_latest_timestamp(db_baseline)
+partition_counts = db_baseline.set_index("s3_location")["partition_count"].to_dict()
+partition_fingerprint = db_baseline.set_index("s3_location")["fingerprint"].to_dict()
 
 @pytest.mark.parametrize("s3_location", s3_locations)
 def test_partition_counts(s3_location):
