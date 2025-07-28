@@ -24,6 +24,9 @@ export AWS_SECRET_ACCESS_KEY=abc123abc123
 export S3_ENDPOINT_URL=http://localhost:9000
 export S3_BUCKET_NAME=flight-bucket
 export S3_PREFIX=refined
+
+export S3_BASELINE_BUCKET=admin-bucket
+export S3_BASELINE_OBJECT_NAME=baseline_s3.csv
 ```
 
 Run the process for creating the baseline (calculating the number of partitions and the fingerprint of all the partition names

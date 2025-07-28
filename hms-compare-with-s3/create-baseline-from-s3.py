@@ -12,6 +12,9 @@ endpoint_url = os.getenv('S3_ENDPOINT_URL', 'http://localhost:9000')
 bucket = os.getenv('S3_BUCKET', 'flight-bucket')
 prefix = os.getenv('S3_PREFIX', 'refined')  # optionally, specify a prefix
 
+baseline_bucket = os.getenv('S3_BASELINE_BUCKET', 'admin-bucket')
+baseline_object_name = os.getenv('S3_BASELINE_OBJECT_NAME', 'baseline_s3.csv')
+
 # Create S3 client configuration
 s3_config = {"service_name": "s3"}
 if endpoint_url:
@@ -54,13 +57,14 @@ def get_partition_info(s3a_url):
         "timestamp": int(latest_ts.timestamp())
     }
 
-with open("baseline_s3.csv", "w") as f:
+with open(baseline_object_name, "w") as f:
     # Print CSV header
     print("s3_location,partition_count,fingerprint,timestamp", file=f)
                 
     # Iterate through Hive tables
     for table_num in range(0, 10):
-        info = get_partition_info(f"s3a://flight-bucket/refined/flights_{table_num}_t")
+        info = get_partition_info(f"s3a://{bucket}/{prefix}/flights_{table_num}_t")
         print(f"{info['s3_location']},{info['partition_count']},{info['fingerprint']},{info['timestamp']}", file=f)
 
-s3.upload_file("baseline_s3.csv", "admin-bucket", "baseline_s3.csv")        
+# upload the file to S3 to make it available
+s3.upload_file(baseline_object_name,baseline_bucket, baseline_object_name)
