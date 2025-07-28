@@ -15,7 +15,6 @@ db-compare/.DS_Store
 /platys-hms/container-volume
 /hive-metastore-python/gen-py
 
-/hms-s3-compare-partitions/venv
 /hms-s3-repair-performance-test/venv
 
 **/__pycache__
@@ -23,3 +22,5 @@ db-compare/.DS_Store
 /hms-test-availability/venv
 
 .DS_Store
+/hms-compare-with-s3/venv
+/hms-compare-data-metrics/venv
