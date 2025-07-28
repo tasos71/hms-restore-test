@@ -6,6 +6,7 @@ The following folders contains the tests
 
  * [hms-s3-restore-test](./hms-s3-restore-test) - testing the setup of S3 and Hive Metastore restore and keeping the two synchronized
  * [hms-s3-repair-performance-test](./hms-s3-repair-performance-test) - performance test of the Trino "repair" operation for Hive Metastore
- * [hms-s3-compare-partitions](./hms-s3-compare-partitions) - compare s3 partitions (baseline) against the hive metastore db
+ * [hms-compare-data-metrics](./hms-compare-data-metrics) - consume table metrics from Kafka and compare them against the data in Trino
+ * [hms-compare-with-s3](./hms-compare-with-s3) - compare s3 partitions (baseline) against the data in the hive metastore db
  * [kafka-listener](./kafka-listener) - an implementation of the HMS `TransactionalMetaStoreEventListener` interface for sending data to a Kafka topic
  * [hms-test-availability](./hms-test-availability) - testing the Hive Metastore service for it's availability
