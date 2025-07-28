@@ -7,3 +7,5 @@ pytest-order
 sqlalchemy-trino
 docker
 boto3
+pyarrow
+pandas

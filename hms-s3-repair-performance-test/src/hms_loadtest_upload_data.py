@@ -27,7 +27,6 @@ trino_url = f'trino://{TRINO_USER}:{TRINO_PASSWORD}@{TRINO_HOST}:{TRINO_PORT}/mi
 hms_engine = create_engine(hms_url)
 trino_engine = create_engine(trino_url)
 
-#docker.DockerClient(base_url='tcp://127.0.0.1:2375')
 client = docker.from_env()
 
 def loadtest_upload(end_year=2010, num_tables=1000, num_objects=5):
@@ -38,7 +37,7 @@ def loadtest_upload(end_year=2010, num_tables=1000, num_objects=5):
             for nof_objects in range(0, num_objects):
                 for table_num in range(0, num_tables):
                 # Upload objects per month
-                    output = hms_loadtest_base.upload_flights(year, month, table_num, nof_objects)
+                    output = hms_loadtest_base.upload_flights3(year, month, table_num, nof_objects)
                     assert 0 == int(output.exit_code), f"Failed to upload flights data for period {1} to table flights_{table_num}_t: {output.output.decode('utf-8')}"
                     hms_loadtest_base.do_trino_repair(table_num)
 

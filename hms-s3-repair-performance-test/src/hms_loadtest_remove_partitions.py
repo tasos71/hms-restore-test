@@ -27,8 +27,29 @@ trino_url = f'trino://{TRINO_USER}:{TRINO_PASSWORD}@{TRINO_HOST}:{TRINO_PORT}/mi
 hms_engine = create_engine(hms_url)
 trino_engine = create_engine(trino_url)
 
-#docker.DockerClient(base_url='tcp://127.0.0.1:2375')
-client = docker.from_env()
+def get_hms_partitions_after(epoc_timestamp: int):
+    with hms_engine.connect() as conn:
+        result = conn.execute(text(f"""
+            SELECT t."TBL_NAME", t."TBL_TYPE", t."LOCATION", p.*
+            FROM (
+                SELECT *
+                FROM public."PARTITIONS" p
+                
+            ) p
+            JOIN (
+                SELECT t."TBL_ID",
+                    t."TBL_NAME",
+                    t."TBL_TYPE",
+                    s."LOCATION"
+                FROM public."TBLS" t
+                JOIN public."DBS" d ON t."DB_ID" = d."DB_ID"
+                JOIN public."SDS" s ON t."SD_ID" = s."SD_ID"
+            ) t
+            ON t."TBL_ID" = p."TBL_ID"
+            where p."CREATE_TIME" > {epoc_timestamp}
+        """))
+        row = result.mappings()()  # strict: must return exactly one row
+        return row
 
 def loadtest_remove(num_tables=1000, year=2009, month=12):
     # Remove partitions from flights data

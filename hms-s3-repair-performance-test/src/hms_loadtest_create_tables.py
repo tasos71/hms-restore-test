@@ -27,13 +27,15 @@ trino_url = f'trino://{TRINO_USER}:{TRINO_PASSWORD}@{TRINO_HOST}:{TRINO_PORT}/mi
 hms_engine = create_engine(hms_url)
 trino_engine = create_engine(trino_url)
 
-#docker.DockerClient(base_url='tcp://127.0.0.1:2375')
 client = docker.from_env()
 
 def loadtest_create_tables(num_tables=1000):
     # Create schema and tables
-    hms_loadtest_base.create_schema()
-    
+    try:
+        hms_loadtest_base.create_schema()
+    except Exception as e:
+        print(f"Error creating schema: {e}")
+
     for table_num in range(0, num_tables):
         hms_loadtest_base.create_flights_table(table_num)
 
