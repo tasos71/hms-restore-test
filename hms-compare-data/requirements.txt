@@ -1,0 +1,5 @@
+pytest
+sqlalchemy
+sqlalchemy-trino
+confluent-kafka[avro]
+fastavro

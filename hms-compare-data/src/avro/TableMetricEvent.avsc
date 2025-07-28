@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "TableMetricEvent",
+  "namespace": "com.juliusbaer.hms.metrics",
+  "fields": [
+    {
+      "name": "table_name",
+      "type": "string"
+    },
+    {
+      "name": "event_time",
+      "type": "long"
+    },
+    {
+      "name": "value",
+      "type": "long"
+    },
+    {
+      "name": "metric_type",
+      "type": "string"
+    }
+  ]
+}

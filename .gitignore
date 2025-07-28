@@ -22,3 +22,4 @@ db-compare/.DS_Store
 /hms-s3-restore-test/venv
 /hms-test-availability/venv
 
+.DS_Store
