@@ -10,8 +10,9 @@ from hive_metastore import ThriftHiveMetastore
 # Read connection details from environment variables
 HMS_HOST = os.getenv('HMS_HOST', 'localhost')
 HMS_PORT = os.getenv('HMS_PORT', '9083')
-HMS_TEMP_TABLE_NAME = os.getenv('HMS_TEMP_TABLE_NAME', 'hms_test_availability')
-HMS_TEMP_TABLE_DBNAME = os.getenv('HMS_TEMP_TABLE_NAME', 'dummy')
+HMS_TEMP_TABLE_NAME = os.getenv('HMS_TEMP_TABLE_NAME', 'hms_test_availability_t')
+HMS_TEMP_TABLE_DBNAME = os.getenv('HMS_TEMP_TABLE_DBNAME', 'default')
+HMS_TEMP_TABLE_LOCATION = os.getenv('HMS_TEMP_TABLE_LOCATION', 's3a://flight-bucket/hms_test_availability/')
 
 def getClient():
     # Connect
@@ -73,7 +74,7 @@ def test_create_table():
 
         sd=ThriftHiveMetastore.StorageDescriptor(
             cols=fields,
-            location='s3a://flight-bucket/test',
+            location=HMS_TEMP_TABLE_LOCATION,
             inputFormat='org.apache.hadoop.mapred.TextInputFormat',
             outputFormat='org.apache.hadoop.mapred.TextInputFormat',
             serdeInfo=ThriftHiveMetastore.SerDeInfo(

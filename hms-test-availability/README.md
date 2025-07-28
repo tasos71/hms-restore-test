@@ -1,9 +1,8 @@
 # Test Availability of Hive Metastore Service
 
-Tests if Hive Metastore Service (HMS) is up and running and can be used over the Thrift API.
+A suite of `pytest` to test if Hive Metastore Service (HMS) is up and running and can be used over the Thrift API.
 
-Currently only list operations (for catalogs, databases and tables) are used, only testing read-only operations on Hive Metastore. 
-The create, alter and drop of a table needs to be implemented as well, to also test write operations on the Hive Metastore.
+Both list operations (for catalogs, databases and tables) are used as well as a create and drop of a table is tested, so we are sure that the Hive Metastore is up and running for read as well as write operations.
 
 ## Prepare environment
 
@@ -30,6 +29,9 @@ Set environment variables
 ```bash
 export HMS_HOST=localhost
 export HMS_PORT=9083
+export HMS_TEMP_TABLE_NAME=hms_test_availability_t
+export HMS_TEMP_TABLE_DBNAME=default
+export HMS_TEMP_TABLE_LOCATION=s3a://admin-bucket/hms_test_availability_t
 ```
 
 ### Run it in verbose mode
