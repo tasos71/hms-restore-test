@@ -46,11 +46,7 @@ Check the log of `airflow` to be up and running by running `docker logs -f airfl
 
 ## Open Airflow Dashboard
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28139> and login with user `airflow` and password `abc123!`. You should see the empty Airflow dashboard.
-=======
-Navigate to <http://10.156.72.251:28139> and login with user `airflow` and password `abc123!`. You should see the empty Airflow dashboard.
->>>>>>> Stashed changes
 
 ![](./images/airflow-dashboard.png)
 

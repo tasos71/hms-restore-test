@@ -13,10 +13,6 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28137>. 
-=======
-Navigate to <http://10.156.72.251:28137>. 
->>>>>>> Stashed changes
 
 Use `admin` for user and `abc123!abc123!` for the password. 

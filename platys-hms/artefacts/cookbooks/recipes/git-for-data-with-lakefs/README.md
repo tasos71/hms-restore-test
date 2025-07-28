@@ -230,11 +230,7 @@ platys-mdp-init  |
 
 ## Using LakeFS to crate a Branch
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28220> and login as `admin` with password `abc123abc123!`. You should see the two repositories `admin` and `demo`, which confirms that the automatic setup of Minio and LakeFS has worked!
-=======
-Navigate to <http://10.156.72.251:28220> and login as `admin` with password `abc123abc123!`. You should see the two repositories `admin` and `demo`, which confirms that the automatic setup of Minio and LakeFS has worked!
->>>>>>> Stashed changes
 
 Click on `demo` and on the next page navigate to the `branches` tab. 
 
@@ -246,11 +242,7 @@ Now we will use Filestash to create a new object in the branch.
 
 ## Using Filestash to create a new object
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28192>, navigate to the **S3** tab and enter `admin` for the **Access Key ID** field, `abc123abc123!` for the **Secret Access Key** field, enable **Advanced** and enter `http://lakefs:8000` into the **Endpoint** field. Clic on **CONNECT**.  
-=======
-Navigate to <http://10.156.72.251:28192>, navigate to the **S3** tab and enter `admin` for the **Access Key ID** field, `abc123abc123!` for the **Secret Access Key** field, enable **Advanced** and enter `http://lakefs:8000` into the **Endpoint** field. Clic on **CONNECT**.  
->>>>>>> Stashed changes
 
 You should be connected to LakeFS and see two folders, `admin` and `demo`, representing the two repositories. 
 
@@ -268,11 +260,7 @@ and click on the save icon in the bottom right.
 
 ## View, commit and merge the changes in LakeFS
 
-<<<<<<< Updated upstream
 Back in LakeFS UI (<http://192.168.1.112:28220>) navigate first to the `main` branch and it should be empty. Now navigate to the `experiment` branch and click on **Uncommitted Changes** and you should see the new `person.csv` which we added but is not yet commited.
-=======
-Back in LakeFS UI (<http://10.156.72.251:28220>) navigate first to the `main` branch and it should be empty. Now navigate to the `experiment` branch and click on **Uncommitted Changes** and you should see the new `person.csv` which we added but is not yet commited.
->>>>>>> Stashed changes
 
 Click on **COMMIT CHANGES** and enter `Added the person.csv file` for the commit message and click on **COMMIT**. Navigating to **Objects** and you will see the file. If you navigate to the `main` branch, you will see that it is still empty. 
 

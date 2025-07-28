@@ -14,9 +14,5 @@ platys gen
 The GraphQL Endpoint can be reached here:
 
 ```
-<<<<<<< Updated upstream
 http://192.168.1.112:28291/graphql
-=======
-http://10.156.72.251:28291/graphql
->>>>>>> Stashed changes
 ```

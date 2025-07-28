@@ -13,9 +13,5 @@ platys gen
 
 ## How to use?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:3001>
-=======
-Navigate to <http://10.156.72.251:3001>
->>>>>>> Stashed changes
 

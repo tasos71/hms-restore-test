@@ -32,11 +32,7 @@ services:
       com.platys.name: my-service
       com.platys.description: UI for the service
       com.platys.webui.title: The webui of the service
-<<<<<<< Updated upstream
       com.platys.webui.url: http://192.168.1.112:8081        
-=======
-      com.platys.webui.url: http://10.156.72.251:8081        
->>>>>>> Stashed changes
     ports:
       - "8081:8081"
     environment:

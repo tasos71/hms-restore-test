@@ -187,6 +187,36 @@ services:
       interval: 10s
       retries: 20
       test: curl --fail --silent --insecure http://schema-registry-1:8081/subjects --output /dev/null || exit 1
+  #  ================================== Jikkou ========================================== #
+  jikkou:
+    image: streamthoughts/jikkou:main
+    container_name: jikkou
+    hostname: jikkou
+    labels:
+      com.platys.name: jikkou
+      com.platys.description: Resource as Code framework for Apache Kafka
+    environment:
+      JIKKOU_DEFAULT_KAFKA_BOOTSTRAP_SERVERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      JIKKOU_DEFAULT_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
+      JIKKOU_KAFKA_BROKERS_WAIT_FOR_MIN_AVAILABLE: 3
+      JIKKOU_KAFKA_BROKERS_WAIT_FOR_ENABLED: 'true'
+      JIKKOU_KAFKA_BROKERS_WAIT_FOR_RETRY_BACKOFF_MS: 10000
+      JIKKOU_KAFKA_BROKERS_WAIT_FOR_TIMEOUT_MS: 120000
+      VALIDATION_DEFAULT_TOPIC_NAME_REGEX: '[a-zA-Z0-9\._\-]+'
+      VALIDATION_DEFAULT_TOPIC_MIN_NUM_PARTITIONS: 1
+      VALIDATION_DEFAULT_TOPIC_MIN_REPLICATION_FACTOR: 1
+    volumes:
+      - ./data-transfer:/data-transfer
+      - ./scripts/jikkou/:/jikkou
+      - ./conf/jikkou/application.conf:/appuser/.jikkou/application.conf
+      - ./conf/jikkou/config:/etc/jikkou/config
+    command:
+      - apply
+      - --files
+      - /jikkou/
+      - --file-name
+      - '**/*.{yaml,yml}'
+    restart: on-failure
   #  ================================== Apache Kafka HQ (AKHQ) ========================================== #
   akhq:
     image: tchiotludo/akhq:latest
@@ -337,54 +367,6 @@ services:
     restart: unless-stopped
     healthcheck:
       test: [CMD, psql, -U, hive, metastore_db]
-  #  ================================== Jupyter ========================================== #
-  jupyter:
-    image: quay.io/jupyter/minimal-notebook:latest
-    container_name: jupyter
-    hostname: jupyter
-    labels:
-      com.platys.name: jupyter
-      com.platys.description: Web-based interactive development environment for notebooks, code, and data
-      com.platys.webui.title: Jupyter UI
-      com.platys.webui.url: http://dataplatform:28888
-      com.platys.password.envvars: PLATYS_JUPYTER_TOKEN,PLATYS_AWS_SECRET_ACCESS_KEY
-    ports:
-      - 28888:8888
-    user: root
-    extra_hosts:
-      - host.docker.internal:host-gateway
-    environment:
-      JUPYTER_ENABLE_LAB: "'yes'"
-      GRANT_SUDO: "'yes'"
-      JUPYTER_TOKEN: ${PLATYS_JUPYTER_TOKEN:-abc123!}
-      DOCKER_STACKS_JUPYTER_CMD: lab
-      MAVEN_DOWNLOAD_JARS: com.amazonaws:aws-java-sdk-bundle:1.12.262,org.apache.hadoop:hadoop-aws:3.3.4,com.google.guava:guava:27.1-jre
-      # remove some JARS if they are conflicting with the ones installed above
-      REMOVE_JARS: guava-14.0.1.jar
-      # for awscli & s3cmd
-      AWS_ACCESS_KEY_ID: ${PLATYS_AWS_ACCESS_KEY:-admin}
-      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-abc123abc123}
-      AWS_ENDPOINT: http://minio-1:9000
-      AWS_REGION: us-east-1
-      AWS_DEFAULT_REGION: us-east-1
-    volumes:
-      - ./data-transfer:/data-transfer
-      - ./init/jupyter/on-startup-jupyter/:/usr/local/bin/start-notebook.d/
-      - ./init/jupyter/on-startup-jupyter-finished/:/usr/local/bin/before-notebook.d/
-      - ./init/jupyter/on-startup-notebook-kernel:/home/jovyan/.ipython/profile_default/startup/
-      - ./scripts/docker/maven-download.sh:/maven-download.sh
-    command:
-      # In the command section, $ are replaced with $$ to avoid the error 'Invalid interpolation format for "command" option'
-      - bash
-      - -c
-      - |
-        conda create -y --name py312 python=3.12.8
-        source /opt/conda/etc/profile.d/conda.sh
-        conda activate py312
-        pip install ipykernel    
-        python -m ipykernel install --user --name py312 --display-name "Python 3.12.8 (ipykernel)"
-        start-notebook.sh
-    restart: unless-stopped
   #  ================================== Trino ========================================== #
   trino-1:
     image: trinodb/trino:476
@@ -417,6 +399,8 @@ services:
       NESSIE_CATALOG_WAREHOUSE_DIR: s3a://admin-bucket/nessie/warehouse
       ICEBERG_REST_CATALOG_URI: http://iceberg-rest-catalog:8181
       ICEBERG_REST_CATALOG_WAREHOUSE: s3a://admin-bucket/iceberg/warehouse
+      ICEBERG_LAKEKEEPER_CATALOG_URI: http://lakekeeper:8181/catalog
+      ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: s3a://admin-bucket/iceberg/warehouse
       HIVE_METASTORE_DB_USER: hive
       HIVE_METASTORE_DB_PASSWORD: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-abc123!}
       EVENT_LISTENER_CONFIG_FILES: ''

@@ -13,11 +13,7 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28298> to view the Thriftserver UI.
-=======
-Navigate to <http://10.156.72.251:28298> to view the Thriftserver UI.
->>>>>>> Stashed changes
 
 ### Connect with Beeline
 
@@ -37,8 +33,4 @@ and connect to Spark Thrift Server (enter blank for username and password)
 
 Download Hive JDBC Driver 3.1.2 (standalone) from [here](https://repo.maven.apache.org/maven2/org/apache/hive/hive-jdbc/3.1.2/hive-jdbc-3.1.2-standalone.jar).
 
-<<<<<<< Updated upstream
 Use `jdbc:hive2://192.168.1.112:28118` (external) or `jdbc:hive2://spark-thriftserver:10000` (internal) for the JDBC URL and use `org.apache.hive.jdbc.HiveDriver` for the class name. 
-=======
-Use `jdbc:hive2://10.156.72.251:28118` (external) or `jdbc:hive2://spark-thriftserver:10000` (internal) for the JDBC URL and use `org.apache.hive.jdbc.HiveDriver` for the class name. 
->>>>>>> Stashed changes

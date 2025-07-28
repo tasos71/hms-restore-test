@@ -266,11 +266,7 @@ $ curl -G -s "http://198.19.249.175:3100/loki/api/v1/query" --data-urlencode 'qu
 
 ## Visualize in Grafana
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:3000> and login as `admin` with password `abc123!`.
-=======
-Navigate to <http://10.156.72.251:3000> and login as `admin` with password `abc123!`.
->>>>>>> Stashed changes
 
 In the menu to the left, click **Explore** and in the drop down list on the top, select **Loki**.
 

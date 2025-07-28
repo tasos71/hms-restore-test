@@ -18,11 +18,7 @@ If you are trying to add a schema to the schema registry you should succeed. Try
 ```
 curl  -XPOST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{
   "schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"com.trivadis.examples.clients.simpleavro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"temp\",\"type\":\"double\"}]}"
-<<<<<<< Updated upstream
 }' http://192.168.1.112:8081/subjects/test-value/versions
-=======
-}' http://10.156.72.251:8081/subjects/test-value/versions
->>>>>>> Stashed changes
 ```
 
 ## Add read-only configuration
@@ -53,9 +49,5 @@ docker-compose up -d
 ```
 curl  -XPOST -H "Content-Type: application/vnd.schemaregistry.v1+json" --data '{
   "schema": "{\"type\":\"record\",\"name\":\"Payment\",\"namespace\":\"com.trivadis.examples.clients.simpleavro\",\"fields\":[{\"name\":\"id\",\"type\":\"string\"},{\"name\":\"temp\",\"type\":\"double\"}]}"
-<<<<<<< Updated upstream
 }' http://192.168.1.112:8081/subjects/test-value/versions
-=======
-}' http://10.156.72.251:8081/subjects/test-value/versions
->>>>>>> Stashed changes
 ```

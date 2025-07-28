@@ -19,10 +19,6 @@ docker-compose up -d
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28264> and login as user `demo` with password `demo`.
-=======
-Navigate to <http://10.156.72.251:28264> and login as user `demo` with password `demo`.
->>>>>>> Stashed changes
 
 

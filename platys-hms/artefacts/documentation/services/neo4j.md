@@ -13,11 +13,7 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:7474> to use the Neo4J Browser. Login with user `neo4j` and password `abc123abc123`.
-=======
-Navigate to <http://10.156.72.251:7474> to use the Neo4J Browser. Login with user `neo4j` and password `abc123abc123`.
->>>>>>> Stashed changes
 
 To use the `cypher-shell`, in a terminal window execute
 

@@ -13,8 +13,4 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:9443/fhir-server/api/v4/$healthcheck>. 
-=======
-Navigate to <http://10.156.72.251:9443/fhir-server/api/v4/$healthcheck>. 
->>>>>>> Stashed changes

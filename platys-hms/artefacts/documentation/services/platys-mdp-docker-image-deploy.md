@@ -44,11 +44,7 @@ you have to specify insecure registry, if the docker registry is exposed over ht
 
 ```json
 {
-<<<<<<< Updated upstream
     "insecure-registries": ["192.168.1.112:5020", "192.168.1.112:5020", "localhost:5020"]
-=======
-    "insecure-registries": ["192.168.1.112:5020", "10.156.72.251:5020", "localhost:5020"]
->>>>>>> Stashed changes
 }
 ```
 

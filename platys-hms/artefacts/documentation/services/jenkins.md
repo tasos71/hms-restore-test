@@ -15,8 +15,4 @@ platys gen
 
 ### Web UI
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28262>.
-=======
-Navigate to <http://10.156.72.251:28262>.
->>>>>>> Stashed changes

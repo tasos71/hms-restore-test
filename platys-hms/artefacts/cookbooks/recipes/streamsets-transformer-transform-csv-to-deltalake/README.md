@@ -48,11 +48,7 @@ docker exec -ti awscli s3cmd put /data-transfer/flight-data/plane-data.csv s3://
 
 ## StreamSets Transformer
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:19630> and create a new pipeline
-=======
-Navigate to <http://10.156.72.251:19630> and create a new pipeline
->>>>>>> Stashed changes
 
 Add an **S3** origin
  

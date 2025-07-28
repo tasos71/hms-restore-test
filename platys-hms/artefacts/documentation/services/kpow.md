@@ -13,11 +13,7 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28283>.
-=======
-Navigate to <http://10.156.72.251:28283>.
->>>>>>> Stashed changes
 
 You have to get a license from [kpow](https://kpow.io/) here: <https://kpow.io/pricing/>.
 

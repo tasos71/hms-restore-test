@@ -13,8 +13,4 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Configure  to <http://192.168.1.112:28327>.
-=======
-Configure  to <http://10.156.72.251:28327>.
->>>>>>> Stashed changes

@@ -304,7 +304,7 @@
       #
       # ===== jikkou ========
       #
-      JIKKOU_enable: false
+      JIKKOU_enable: true
       JIKKOU_kafka_brokers_wait_for_min_available_enabled: true
       JIKKOU_kafka_brokers_wait_for_enabled: true
       JIKKOU_kafka_brokers_wait_for_retry_backoff_ms: 10000

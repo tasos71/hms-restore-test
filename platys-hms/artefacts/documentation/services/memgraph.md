@@ -17,10 +17,6 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28288> if you have the Memgraph-Platform enabled.
-=======
-Navigate to <http://10.156.72.251:28288> if you have the Memgraph-Platform enabled.
->>>>>>> Stashed changes
 
 You can also download and install [Memgraph Lab](https://memgraph.com/lab) and [mgconsole](https://memgraph.com/docs/memgraph/connect-to-memgraph/mgconsole) ([download here](https://memgraph.com/download#memgraph-lab)) to your local machine and connect to the Memgraph instance running on the Platys stack.

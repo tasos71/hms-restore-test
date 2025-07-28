@@ -8,7 +8,7 @@
 |[hive-metastore](./documentation/services/hive-metastore )||9083<br>|9083<br>|Hive Metastore
 |[hive-metastore-db](./documentation/services/hive-metastore )||5442<br>|5432<br>|Hive Metastore DB
 |[hive-server](./documentation/services/hive )|[Web UI](http://192.168.1.112:10002)|10000<br>10001<br>10002<br>|10000<br>10001<br>10002<br>|Hive Server
-|[jupyter](./documentation/services/jupyter )|[Web UI](http://192.168.1.112:28888)|28888<br>|8888<br>|Web-based interactive development environment for notebooks, code, and data
+|[jikkou](./documentation/services/jikkou )||||Resource as Code framework for Apache Kafka
 |[kafka-1](./documentation/services/kafka )||9092<br>19092<br>29092<br>39092<br>9992<br>1234<br>|9092<br>19092<br>29092<br>39092<br>9992<br>1234<br>|Kafka Broker 1
 |[kafka-2](./documentation/services/kafka )||9093<br>19093<br>29093<br>39093<br>9993<br>1235<br>|9093<br>19093<br>29093<br>39093<br>9993<br>1234<br>|Kafka Broker 2
 |[kafka-3](./documentation/services/kafka )||9094<br>19094<br>29094<br>39094<br>9994<br>1236<br>|9094<br>19094<br>29094<br>39094<br>9994<br>1234<br>|Kafka Broker 3

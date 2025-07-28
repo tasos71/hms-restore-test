@@ -13,11 +13,7 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:18080/nifi>
-=======
-Navigate to <http://10.156.72.251:18080/nifi>
->>>>>>> Stashed changes
 
 Login with User `nifi` and password `1234567890ACD`.
 

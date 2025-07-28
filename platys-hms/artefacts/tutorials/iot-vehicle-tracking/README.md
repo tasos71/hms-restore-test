@@ -185,15 +185,9 @@ As a final step, add `dataplatform` as an alias to the `/etc/hosts` file so that
 <public-host-ip>		dataplatform
 ```
 
-<<<<<<< Updated upstream
 For a list of available services, navigate to <http://192.168.1.112:80/services>.
 
 When a terminal is needed, you can use the Web Terminal available at <http://192.168.1.112:3001/>.
-=======
-For a list of available services, navigate to <http://10.156.72.251:80/services>.
-
-When a terminal is needed, you can use the Web Terminal available at <http://10.156.72.251:3001/>.
->>>>>>> Stashed changes
 
 ## Step 0 - Initialization
 
@@ -208,11 +202,7 @@ docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 docker exec -it kafka-1 kafka-topics --bootstrap-server kafka-1:19092  --create --topic vehicle_tracking_sysB --partitions 8 --replication-factor 3
 ```
 
-<<<<<<< Updated upstream
 If you don't like to work with the CLI, you can also create the Kafka topics using the graphical user interfaces [Cluster Manager for Kafka (CMAK)](http://192.168.1.112:28104) or the [Apache Kafka HQ (AKHQ)](http://192.168.1.112:28107). 
-=======
-If you don't like to work with the CLI, you can also create the Kafka topics using the graphical user interfaces [Cluster Manager for Kafka (CMAK)](http://10.156.72.251:28104) or the [Apache Kafka HQ (AKHQ)](http://10.156.72.251:28107). 
->>>>>>> Stashed changes
 
 ### Check logistics_db Postgresql Database
 
@@ -313,11 +303,7 @@ The consumed messages will show up in the terminal.
 
 #### Using HiveMQ Web UI  
 
-<<<<<<< Updated upstream
 To start consuming using the MQTT UI ([HiveMQ Web UI](https://www.hivemq.com/docs/3.4/web-ui/introduction.html)), navigate to <http://192.168.1.112:28136> and connect using `dataplatform` for the **Host** field, `9101` for the **Port** field and then click on **Connect**: 
-=======
-To start consuming using the MQTT UI ([HiveMQ Web UI](https://www.hivemq.com/docs/3.4/web-ui/introduction.html)), navigate to <http://10.156.72.251:28136> and connect using `dataplatform` for the **Host** field, `9101` for the **Port** field and then click on **Connect**: 
->>>>>>> Stashed changes
 
 ![Alt Image Text](./images/mqtt-ui-connect.png "MQTT UI Connect")
 	
@@ -388,11 +374,7 @@ curl -X "DELETE" "$DOCKER_HOST_IP:8083/connectors/mqtt-vehicle-position-source"
 
 ### Monitor connector in Kafka Connect UI
 
-<<<<<<< Updated upstream
 Navigate to the [Kafka Connect UI](http://192.168.1.112:28103) to view the connector in a graphical window.
-=======
-Navigate to the [Kafka Connect UI](http://10.156.72.251:28103) to view the connector in a graphical window.
->>>>>>> Stashed changes
 
 ## Step 2 - Using KSQL to Refine the data
 
@@ -566,11 +548,7 @@ we can use the `-s` and `-r` option to specify the Avro Serde and the URL of the
 docker exec -ti kcat kcat -b kafka-1 -t vehicle_tracking_refined -s value=avro -r http://schema-registry-1:8081
 ```
 
-<<<<<<< Updated upstream
 You can use the Schema Registry UI on <http://192.168.1.112:28102> to view the Avro Schema created by ksqlDB.
-=======
-You can use the Schema Registry UI on <http://10.156.72.251:28102> to view the Avro Schema created by ksqlDB.
->>>>>>> Stashed changes
 
 ## Step 3 - Integrate System B
 
@@ -824,13 +802,8 @@ public class DetectProblematicDriving {
 	public static void main(final String[] args) {
 		final String applicationId = "test";
 		final String clientId = "test";
-<<<<<<< Updated upstream
 		final String bootstrapServer = "192.168.1.112:9092";
 		final String schemaRegistryUrl = "http://192.168.1.112:8081";
-=======
-		final String bootstrapServer = "10.156.72.251:9092";
-		final String schemaRegistryUrl = "http://10.156.72.251:8081";
->>>>>>> Stashed changes
 		final boolean cleanup = false;
 		final String stateDirPath = "C:\\tmp\\kafka-streams";
 
@@ -966,11 +939,7 @@ Create a file `app.py` and add the following code
 ```python
 import faust
 
-<<<<<<< Updated upstream
 kafka_brokers = ['192.168.1.112:29092']
-=======
-kafka_brokers = ['10.156.72.251:29092']
->>>>>>> Stashed changes
 
 # convenience func for launching the app
 def main() -> None:

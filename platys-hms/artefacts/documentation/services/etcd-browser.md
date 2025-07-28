@@ -13,10 +13,6 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 In a Web-Browser navigate to <http://192.168.1.112:28310>.
-=======
-In a Web-Browser navigate to <http://10.156.72.251:28310>.
->>>>>>> Stashed changes
 
 

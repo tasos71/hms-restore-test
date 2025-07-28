@@ -404,11 +404,7 @@ and here is the event for the table:
 
 ## Check the entity in Apache Atlas
 
-<<<<<<< Updated upstream
 In a browser, navigate to <http://192.168.1.112:21000> and search for hive-table
-=======
-In a browser, navigate to <http://10.156.72.251:21000> and search for hive-table
->>>>>>> Stashed changes
 
 ![Hive Table Search](./images/atlas-search-hive-table.png)
 

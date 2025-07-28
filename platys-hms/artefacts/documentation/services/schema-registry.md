@@ -23,11 +23,7 @@ export SCHEMA=$(jq tostring $TOPIC-value.avsc)
 
 echo "{\"schema\":$SCHEMA}"
 
-<<<<<<< Updated upstream
 curl -XPOST -H "Content-Type:application/json" -d"{\"schema\":$SCHEMA}" http://192.168.1.112:8081/subjects/$TOPIC-value/versions
-=======
-curl -XPOST -H "Content-Type:application/json" -d"{\"schema\":$SCHEMA}" http://10.156.72.251:8081/subjects/$TOPIC-value/versions
->>>>>>> Stashed changes
 ```
 
 using `httpie`
@@ -53,11 +49,7 @@ using `httpie`
 
 ```bash
 export TOPIC=topicName
-<<<<<<< Updated upstream
 http http://192.168.1.112:8081/subjects/$TOPIC-value/versions/latest \
-=======
-http http://10.156.72.251:8081/subjects/$TOPIC-value/versions/latest \
->>>>>>> Stashed changes
   | jq -r '.schema|fromjson' \
   > $TOPIC-value.avsc
 ```

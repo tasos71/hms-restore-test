@@ -11,9 +11,5 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <https://192.168.1.112:28296>.
-=======
-Navigate to <https://10.156.72.251:28296>.
->>>>>>> Stashed changes
 

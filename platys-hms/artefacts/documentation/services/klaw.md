@@ -13,10 +13,6 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28309> to use the Klaw UI.
-=======
-Navigate to <http://10.156.72.251:28309> to use the Klaw UI.
->>>>>>> Stashed changes
 
 Login with default User: `superadmin` and Password: `abc123!`.

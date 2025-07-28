@@ -38,41 +38,25 @@ docker exec -ti kafka-1 kafka-topics --bootstrap-server kafka-1:19092 --create -
 Run the bluesky retriever
 
 ```bash
-<<<<<<< Updated upstream
 docker run --name bluesky-retriever --rm -d -e DESTINATION=kafka -e KAFKA_BROKERS=192.168.1.112:9092 -e KAFKA_TOPIC=bluesky.raw ghcr.io/gschmutz/bluebird:latest
-=======
-docker run --name bluesky-retriever --rm -d -e DESTINATION=kafka -e KAFKA_BROKERS=10.156.72.251:9092 -e KAFKA_TOPIC=bluesky.raw ghcr.io/gschmutz/bluebird:latest
->>>>>>> Stashed changes
 ```
 
 Let's see the messages comming in with `kcat` 
 
 ```bash
-<<<<<<< Updated upstream
 kca	t -q -b 192.168.1.112:9092 -t bluesky.raw
-=======
-kca	t -q -b 10.156.72.251:9092 -t bluesky.raw
->>>>>>> Stashed changes
 ```
 
 What are the different message types?
 
 ```bash
-<<<<<<< Updated upstream
 kcat -q -b 192.168.1.112:9092 -t bluesky.raw | jq .record.commit.collection
-=======
-kcat -q -b 10.156.72.251:9092 -t bluesky.raw | jq .record.commit.collection
->>>>>>> Stashed changes
 ```
 
 Let's view only the `text` of an `app.bsky.feed.post` message
 
 ```bash
-<<<<<<< Updated upstream
 kcat -q -b 192.168.1.112:9092 -t bluesky.raw | jq 'select(.record.commit.collection == "app.bsky.feed.post") | .record.commit.record.text'
-=======
-kcat -q -b 10.156.72.251:9092 -t bluesky.raw | jq 'select(.record.commit.collection == "app.bsky.feed.post") | .record.commit.record.text'
->>>>>>> Stashed changes
 ```
 
 ## Kafka Connect - Elasticsearch Sink Connector
@@ -81,11 +65,7 @@ Add the Elasticsearch connector
 
 ```bash
 curl -X PUT \
-<<<<<<< Updated upstream
   http://192.168.1.112:8083/connectors/elasticsearch-bluesky-sink/config \
-=======
-  http://10.156.72.251:8083/connectors/elasticsearch-bluesky-sink/config \
->>>>>>> Stashed changes
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json' \
   -d '{
@@ -115,17 +95,9 @@ curl -X PUT \
 }'
 ```
 
-<<<<<<< Updated upstream
 Visulalize the connector in the [Kafka Connect UI](http://192.168.1.112:28103/).
-=======
-Visulalize the connector in the [Kafka Connect UI](http://10.156.72.251:28103/).
->>>>>>> Stashed changes
 
 
 ## Kibana - Visualize the Posts
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:5601>
-=======
-Navigate to <http://10.156.72.251:5601>
->>>>>>> Stashed changes

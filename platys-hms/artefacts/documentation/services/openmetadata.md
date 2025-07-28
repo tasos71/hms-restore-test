@@ -13,9 +13,5 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:8585> and log in with user `openmetadata` and password `abc123!`.
-=======
-Navigate to <http://10.156.72.251:8585> and log in with user `openmetadata` and password `abc123!`.
->>>>>>> Stashed changes
 

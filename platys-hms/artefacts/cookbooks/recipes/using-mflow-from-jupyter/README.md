@@ -34,11 +34,7 @@ docker-compose up -d
 
 ## Working with MLflow
 
-<<<<<<< Updated upstream
 Navigate to Jupyter on <http://192.168.1.112:28888>. 
-=======
-Navigate to Jupyter on <http://10.156.72.251:28888>. 
->>>>>>> Stashed changes
 
 Create a new notebook and add the following cell
 
@@ -146,10 +142,6 @@ train(0.1, 0.1)
 
 ## Check it in MLFlow dashboard
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28229> to check the results.
-=======
-Navigate to <http://10.156.72.251:28229> to check the results.
->>>>>>> Stashed changes
 
 ![](./images/mlflow-dashboard.png)

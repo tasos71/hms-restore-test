@@ -11,10 +11,6 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:28285>.
-=======
-Navigate to <http://10.156.72.251:28285>.
->>>>>>> Stashed changes
 
 Login with the credentials configured in `config.yml` (defaults to `admin`/`abc123!`).

@@ -11,8 +11,4 @@ platys gen
 
 ## How to use it?
 
-<<<<<<< Updated upstream
 Navigate to <http://192.168.1.112:2480> and log in as user `root` with default password `abc123abc123` (if not changed using `ARCADEDB_root_password` setting).
-=======
-Navigate to <http://10.156.72.251:2480> and log in as user `root` with default password `abc123abc123` (if not changed using `ARCADEDB_root_password` setting).
->>>>>>> Stashed changes
