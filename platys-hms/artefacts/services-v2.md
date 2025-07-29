@@ -5,6 +5,8 @@
 |[adminio-api](./documentation/services/adminio )|[Rest API](http://192.168.1.112:28191)|28191<br>|8080<br>|MinIO Admin UI
 |[adminio-ui](./documentation/services/adminio )|[Web UI](http://192.168.1.112:28190)|28190<br>|80<br>|MinIO Admin UI
 |[akhq](./documentation/services/akhq )|[Web UI](http://192.168.1.112:28107) - [Rest API](http://192.168.1.112:28107/api)|28107<br>28320<br>|8080<br>28081<br>|Kafka GUI
+|[allure](./documentation/services/allure )|[Rest API](http://192.168.1.112:28278)|28278<br>|5050<br>|Allure Report
+|[allure-ui](./documentation/services/allure )|[Web UI](http://192.168.1.112:28279)|28279<br>|5252<br>|Allure Report
 |[hive-metastore](./documentation/services/hive-metastore )||9083<br>|9083<br>|Hive Metastore
 |[hive-metastore-db](./documentation/services/hive-metastore )||5442<br>|5432<br>|Hive Metastore DB
 |[hive-server](./documentation/services/hive )|[Web UI](http://192.168.1.112:10002)|10000<br>10001<br>10002<br>|10000<br>10001<br>10002<br>|Hive Server

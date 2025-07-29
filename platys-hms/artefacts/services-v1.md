@@ -5,6 +5,8 @@
 |[adminio-api](./documentation/services/adminio )||<http://192.168.1.112:28191>
 |[adminio-ui](./documentation/services/adminio )|<http://192.168.1.112:28190>|
 |[akhq](./documentation/services/akhq )|<http://192.168.1.112:28107>|<http://192.168.1.112:28107/api>
+|[allure](./documentation/services/allure )||<http://192.168.1.112:28278>
+|[allure-ui](./documentation/services/allure )|<http://192.168.1.112:28279>|
 |[hive-metastore](./documentation/services/hive-metastore )||
 |[hive-metastore-db](./documentation/services/hive-metastore )||
 |[hive-server](./documentation/services/hive )|<http://192.168.1.112:10002>|

@@ -2929,6 +2929,22 @@
       JENKINS_enable: false
       JENKINS_volume_map_data: false
       #
+      # ===== Allure ========
+      #
+      ALLURE_enable: true
+      ALLURE_volume_map_result_dir: false
+      ALLURE_results_dir: './container-volume/allure/allure-results'
+      ALLURE_volume_map_project_dir: false
+      ALLURE_check_results_every_seconds: NONE
+      ALLURE_keep_history: true
+      ALLURE_keep_history_latest: 25
+      ALLURE_security_enabled: true
+      ALLURE_admin_user: admin
+      ALLURE_admin_password: abc123!
+      ALLURE_viewer_user: viewer
+      ALLURE_viewer_password: abc123!
+      ALLURE_make_viewer_endpoints_public: true
+      #
       # ===== GitWeb ========
       #
       GITWEB_enable: false
