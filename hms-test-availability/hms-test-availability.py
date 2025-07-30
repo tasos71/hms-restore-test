@@ -29,6 +29,7 @@ def test_get_catalogs():
     
     catalogs = client.get_catalogs()
     
+    # just check if we have catalogs
     assert len(catalogs.names), f"No catalogs have been found, should be more than 0"
 
     # Close connection
@@ -38,7 +39,8 @@ def test_get_databases():
     client, transport = getClient()
     
     databases = client.get_all_databases()
-    
+
+    # just check if we have databases    
     assert len(databases), f"No databases have been found, should be more than 0"
 
     # Close connection
@@ -52,8 +54,10 @@ def test_get_tables():
 
     for db in databases:
         if db == 'default':
+            # Skip default database
             continue
         tables = client.get_all_tables(db)
+        # just check if we have tables
         assert len(tables), f"No tables have been found in database '{db}', should be more than 0"
 
     # Close connection
@@ -87,6 +91,11 @@ def test_create_table():
     
     client.create_table(table_def)
 
+    # Verify table creation
+    created_table = client.get_tables(HMS_TEMP_TABLE_DBNAME, HMS_TEMP_TABLE_NAME)
+    assert len(created_table) > 0, f"Table '{HMS_TEMP_TABLE_NAME}' was not created successfully"
+    assert created_table, f"Table '{HMS_TEMP_TABLE_NAME}' was not created successfully"
+
     # Close connection
     transport.close()    
 
@@ -95,6 +104,10 @@ def test_drop_table():
     client, transport = getClient()
 
     client.drop_table(HMS_TEMP_TABLE_DBNAME, HMS_TEMP_TABLE_NAME, True)
+
+    # Verify table creation
+    created_table = client.get_tables(HMS_TEMP_TABLE_DBNAME, HMS_TEMP_TABLE_NAME)
+    assert len(created_table) == 0, f"Table '{HMS_TEMP_TABLE_NAME}' was not created successfully"
 
     # Close connection
     transport.close()        
