@@ -401,6 +401,13 @@ services:
       ICEBERG_REST_CATALOG_WAREHOUSE: s3a://admin-bucket/iceberg/warehouse
       ICEBERG_LAKEKEEPER_CATALOG_URI: http://lakekeeper:8181/catalog
       ICEBERG_LAKEKEEPER_CATALOG_WAREHOUSE: s3a://admin-bucket/iceberg/warehouse
+      KAFKA_NODES: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      KAFKA_SCHEMA_REGISTRY_URL: http://schema-registry-1:8081
+      KAFKA_CONFIG_RESOURCES: /etc/trino/kafka-configuration.properties
+      KAFKA_SECURITY_PROTOCOL: PLAINTEXT
+      KAFKA_TABLE_NAMES:
+      KAFKA_DEFAULT_SCHEMA: default
+      KAFKA_TABLE_DESCRIPTOR_DIR: /etc/trino/kafka/
       HIVE_METASTORE_DB_USER: hive
       HIVE_METASTORE_DB_PASSWORD: ${PLATYS_HMS_POSTGRESQL_PASSWORD:-abc123!}
       EVENT_LISTENER_CONFIG_FILES: ''
@@ -410,6 +417,9 @@ services:
       - ./conf/trino/single/node.properties:/etc/trino/node.properties
       - ./conf/trino/single/log-debug.properties:/etc/trino/log.properties
       - ./conf/trino/catalog/minio.properties:/catalog/minio.properties
+      - ./conf/trino/catalog/kafka-schema-registry.properties:/catalog/kafka.properties
+      - ./conf/trino/kafka/descriptor:/etc/trino/kafka/
+      - ./conf/trino/kafka/client.properties:/etc/trino/kafka-configuration.properties
       - ./conf/trino/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties
       - ./custom-conf/trino/security:/etc/trino/security
     restart: unless-stopped
@@ -456,9 +466,6 @@ services:
       MINIO_COMPRESSION_ENABLE: off
       MINIO_PROMETHEUS_AUTH_TYPE: public
       MINIO_PROMETHEUS_URL: http://prometheus-1:9090
-      MINIO_AUDIT_KAFKA_ENABLE: on
-      MINIO_AUDIT_KAFKA_BROKERS: kafka-1:19092,kafka-2:19093,kafka-3:19094
-      MINIO_AUDIT_KAFKA_TOPIC: minio-audit-log
     volumes:
       - ./data-transfer:/data-transfer
       - ./container-volume/minio:/data/
@@ -543,6 +550,45 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
+  #  ================================== Allure Report ========================================== #
+  allure:
+    image: frankescobar/allure-docker-service:latest
+    container_name: allure
+    hostname: allure
+    labels:
+      com.platys.name: allure
+      com.platys.description: Allure Report
+      com.platys.restapi.title: Allure API
+      com.platys.restapi.url: http://dataplatform:28278
+    ports:
+      - 28278:5050
+    environment:
+      CHECK_RESULTS_EVERY_SECONDS: NONE
+      KEEP_HISTORY: 1
+      KEEP_HISTORY_LATEST: 25
+      SECURITY_ENABLED: 1
+      SECURITY_USER: admin
+      SECURITY_PASS: abc123!
+      SECURITY_VIEWER_USER: viewer
+      SECURITY_VIEWER_PASS: abc123!
+      MAKE_VIEWER_ENDPOINTS_PUBLIC: 1
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
+  allure-ui:
+    image: frankescobar/allure-docker-service-ui:latest
+    container_name: allure-ui
+    hostname: allure-ui
+    labels:
+      com.platys.name: allure
+      com.platys.description: Allure Report
+      com.platys.webui.title: Allure UI
+      com.platys.webui.url: http://dataplatform:28279
+    environment:
+      ALLURE_DOCKER_PUBLIC_API_URL: http://${PUBLIC_IP}:28278
+      ALLURE_DOCKER_PUBLIC_API_URL_PREFIX: ''
+    ports:
+      - 28279:5252
   #  ================================== markdown-viewer ========================================== #
   markdown-viewer:
     image: dannyben/madness:latest

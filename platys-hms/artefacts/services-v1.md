@@ -17,6 +17,7 @@
 |[markdown-viewer](./documentation/services/markdown-viewer )|<http://192.168.1.112:80>|
 |[minio-1](./documentation/services/minio )|<http://192.168.1.112:9010>|
 |[minio-mc](./documentation/services/minio )||
+|[postgresql](./documentation/services/postgresql )||
 |[schema-registry-1](./documentation/services/schema-registry )||<http://192.168.1.112:8081>
 |[trino-1](./documentation/services/trino )|<http://192.168.1.112:28082/ui/preview>|
 |[trino-cli](./documentation/services/trino )|||

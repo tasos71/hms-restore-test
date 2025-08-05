@@ -17,6 +17,7 @@
 |[markdown-viewer](./documentation/services/markdown-viewer )|[Web UI](http://192.168.1.112:80)|80<br>|3000<br>|Platys Platform homepage viewer
 |[minio-1](./documentation/services/minio )|[Web UI](http://192.168.1.112:9010)|9000<br>9010<br>|9000<br>9010<br>|Software-defined Object Storage
 |[minio-mc](./documentation/services/minio )||||MinIO Console
+|[postgresql](./documentation/services/postgresql )||5432<br>|5432<br>|Open-Source object-relational database system
 |[schema-registry-1](./documentation/services/schema-registry )|[Rest API](http://192.168.1.112:8081)|8081<br>|8081<br>|Confluent Schema Registry
 |[trino-1](./documentation/services/trino )|[Web UI](http://192.168.1.112:28082/ui/preview)|28082<br>28087<br>|8080<br>8443<br>|SQL Virtualization Engine
 |[trino-cli](./documentation/services/trino )||||Trino CLI|

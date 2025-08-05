@@ -64,7 +64,7 @@
       # ===== Apache Kafka ========
       # 
       KAFKA_enable: true
-      # one of enterprise, community, oss
+      # one of enterprise, community, oss or inkless
       KAFKA_edition: 'community'
       KAFKA_use_kraft_mode: true
       KAFKA_unstable_api_enabled: false
@@ -80,6 +80,12 @@
       KAFKA_auto_create_topics_enable: false
       KAFKA_message_timestamp_type: CreateTime
       KAFKA_log_dirs: ''
+      KAFKA_inkless_bucket_name: inkless-bucket
+      # either 'in-memory' or 'postgres'
+      KAFKA_inkless_control_plane_type: postgres
+      KAFKA_inkless_control_plane_db_dbname: postgres
+      KAFKA_inkless_control_plane_db_user: postgres
+      KAFKA_inkless_control_plane_db_password: abc123!      
       # KAFKA_log_segment_bytes:
       # KAFKA_log_retention_ms:
       # KAFKA_log_retention_hours:
@@ -2267,6 +2273,8 @@
       TRINO_hive_views_enabled: false
       TRINO_hive_run_as_invoker: false
       TRINO_hive_legacy_translation: false
+      # either 'file' or 'schema-registry'
+      TRINO_kafka_descriptor_supplier: schema-registry
       TRINO_kafka_table_names: ''
       TRINO_kafka_default_schema: 'default'
       TRINO_event_listeners: ''
@@ -2509,7 +2517,7 @@
       MINIO_buckets: ''
       MINIO_browser_enabled: true
       MINIO_upload_data_transfer_to_bucket_enabled: false
-      MINIO_upload_data_transfer_bucket_name: 'data-transfer-bucket'
+      MINIO_upload_data_transfer_bucket_name: 'data-transfer-bucket,inkless-bucket'
       MINIO_upload_data_transfer_subfolders: ''
       MINIO_audit_webhook_enable: false
       MINIO_audit_webhook_endpoint:

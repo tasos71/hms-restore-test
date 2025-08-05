@@ -83,12 +83,15 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * only create the sub-folders for the enabled services (based on service name) within the `applications`, `conf`, `container-volume`, `custom-conf`, `licenses`, `init`, `plugins`, `scripts` and `security` folders.
  * Maven dependency download now also supports downloading transitive dependency (using strategy `coursier`). Currently only used with Flink.
  * set default for `HIVE_METASTORE_transactional_event_listeners` to be empty. You now have to explicitely set it to `org.apache.hive.hcatalog.listener.DbNotificationListener` or any custom listener implementation you can add to the classpath by using the new config setting `HIVE_METASTORE_plugin_jars`
+ * Add `inkless` as a new option for `KAFKA_edition` (Aiven's fork of preview of KIP-1150 - Diskless Kafka)
+ * Add support for `schema-registry` table descriptor supplier strategy to Trino's Kafka connector implementation
 
 ### Breaking Changes
 
  * `minio-console` removed as docker image is no longer available
  * `MINIO_browser_enable` renamed to `MINIO_browser_enabled` to be conforment with naming convention
  * Change internal port of `docker-registry` from `5000` to `5020`
+ * Any config setting which does not enable a service renamed from `XXXX_ddd_enable` to `XXXX_ddd_enabled`
 
 ## What's new in 1.18.1
 
