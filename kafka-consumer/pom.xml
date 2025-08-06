@@ -1,0 +1,135 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="
+           http://maven.apache.org/POM/4.0.0 
+           http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example.hive</groupId>
+  <artifactId>hms-kafka-consumer</artifactId>
+  <version>0.1.0</version>
+  <packaging>jar</packaging>
+
+  <name>Hive Metastore Kafka Listener</name>
+  <description>Custom Hive Metastore listener to publish events to Kafka</description>
+
+  <properties>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <hive.version>4.0.1</hive.version> <!-- Use your Hive version -->
+    <kafka.clients.version>3.8.0</kafka.clients.version> <!-- Or latest Kafka client -->
+    <confluent.version>7.8.0</confluent.version>
+  </properties>
+
+  <dependencies>
+    <!-- Hive Metastore dependency -->
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-metastore</artifactId>
+      <version>${hive.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-standalone-metastore-common</artifactId>
+      <version>4.1.0</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-common</artifactId>
+      <version>${hive.version}</version> <!-- or your Hive version -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive</groupId>
+      <artifactId>hive-exec</artifactId>
+      <version>${hive.version}</version> <!-- or your Hive version -->
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.hive.hcatalog</groupId>
+      <artifactId>hive-hcatalog-server-extensions</artifactId>
+      <version>${hive.version}</version>
+    </dependency>
+
+    <!-- Kafka Clients -->
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>${kafka.clients.version}</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro</artifactId>
+      <version>1.11.1</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.confluent</groupId>
+      <artifactId>kafka-avro-serializer</artifactId>
+      <version>${confluent.version}</version>
+    </dependency>
+
+    <!-- Logging (optional but recommended) -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>2.0.9</version>
+    </dependency>
+
+  </dependencies>
+
+	<repositories>
+      <repository>
+        <id>central</id>
+        <url>https://repo.maven.apache.org/maven2</url>
+      </repository>
+
+      <repository>
+        <id>sonatype</id>
+        <url>https://oss.sonatype.org/content/repositories/github-releases/</url>
+      </repository>
+      <repository>
+        <id>clojars</id>
+        <url>https://repo.clojars.org/</url>
+      </repository>
+		<repository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</repository>
+	</repositories>
+
+	<pluginRepositories>
+		<pluginRepository>
+			<id>confluent</id>
+			<url>https://packages.confluent.io/maven/</url>
+		</pluginRepository>
+	</pluginRepositories>
+
+  <build>
+    <plugins>
+    <plugin>
+      <groupId>org.apache.avro</groupId>
+      <artifactId>avro-maven-plugin</artifactId>
+      <version>1.11.1</version> <!-- Use a version matching your Avro dependency -->
+      <executions>
+        <execution>
+          <phase>generate-sources</phase>
+          <goals>
+            <goal>schema</goal>
+          </goals>
+          <configuration>
+            <sourceDirectory>${project.basedir}/src/main/avro</sourceDirectory>
+            <outputDirectory>${project.basedir}/target/generated-sources/avro</outputDirectory>
+          </configuration>
+        </execution>
+      </executions>
+    </plugin>
+
+    </plugins>
+  </build>
+
+</project>
