@@ -102,8 +102,14 @@ def upload_flights(year, month, table_num, nof):
 
     return output
 
-def upload_flights3(year, month, table_num, nof):
-    df = pd.read_parquet('/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet')
+
+def upload_flights_with_timestamp_nolongerused(year, month, table_num, nof, use_large=False):
+    if use_large:
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/part-00000-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet'  # large
+    else:
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet'  # small
+
+    df = pd.read_parquet(parquet_file)
 
     df['year'] = year
     df['month'] = month
@@ -119,33 +125,34 @@ def upload_flights3(year, month, table_num, nof):
 
     return output
 
-def upload_flights2(year, month, table_num, nof):
-    df = pd.read_parquet('/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet')
+def upload_flights_with_timestamp(year, month, table_num, nof, use_large=False, duplicateIt=False):
+    if use_large:
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/part-00000-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet'  # large
+    else:
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet'  # small
 
-    with trino_engine.connect() as conn:
-        for _, row in df.iterrows():
-            # Prepare values for SQL insert
-            values = (
-                    row['dayOfMonth'], row['dayOfWeek'], row['depTime'], row['crsDepTime'],
-                    row['arrTime'], row['crsArrTime'], row['uniqueCarrier'], row['flightNum'],
-                    row['tailNum'], row['actualElapsedTime'], row['crsElapsedTime'], row['airTime'],
-                    row['arrDelay'], row['depDelay'], row['origin'], row['destination'],
-                    row['distance'], year, month
-            )
-            insert_sql = f"""
-                    INSERT INTO minio.flight_db.flights_{table_num}_t (
-                        dayOfMonth, dayOfWeek, depTime, crsDepTime, arrTime, crsArrTime,
-                        uniqueCarrier, flightNum, tailNum, actualElapsedTime, crsElapsedTime,
-                        airTime, arrDelay, depDelay, origin, destination, distance,
-                        year, month, eventTimestamp
-                    ) VALUES (
-                        {values[0]}, {values[1]}, {values[2]}, {values[3]}, {values[4]}, {values[5]},
-                        '{values[6]}', '{values[7]}', '{values[8]}', {values[9]}, {values[10]}, {values[11]},
-                        {values[12]}, {values[13]}, '{values[14]}', '{values[15]}', {values[16]},
-                        {values[17]}, {values[18]}, current_timestamp
-                    )
-            """
-            conn.execute(text(insert_sql))
+    df = pd.read_parquet(parquet_file)
+
+    df['year'] = year
+    df['month'] = month
+    index_of_year = df.columns.get_loc('year')
+    df.insert(loc=index_of_year, column='eventTimestamp', value=pd.Timestamp.now())
+
+    if duplicateIt:
+        df_extended = df.copy()
+        for copy in range(0, 9):
+            df_extended = pd.concat([df_extended, df], ignore_index=True)
+
+        df_extended.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet", index=False)
+    else:
+        df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet", index=False)
+
+    # Run a temporary container (e.g., alpine echo)
+    output = client.containers.get('minio-mc').exec_run(
+        cmd=f"mc cp  /data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
+    )
+
+    return output
 
 
 def remove_object(year, month, table_num, nof):

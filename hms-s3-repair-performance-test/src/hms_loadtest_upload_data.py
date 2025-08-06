@@ -29,7 +29,7 @@ trino_engine = create_engine(trino_url)
 
 client = docker.from_env()
 
-def loadtest_upload(end_year=2010, num_tables=1000, num_objects=5):
+def loadtest_upload(end_year=2010, num_tables=1000, num_objects=5, use_large=False):
     # Upload flights data
     for year in range(2008, end_year):
         # For each year, iterate through months
@@ -37,7 +37,7 @@ def loadtest_upload(end_year=2010, num_tables=1000, num_objects=5):
             for nof_objects in range(0, num_objects):
                 for table_num in range(0, num_tables):
                 # Upload objects per month
-                    output = hms_loadtest_base.upload_flights3(year, month, table_num, nof_objects)
+                    output = hms_loadtest_base.upload_flights_with_timestamp(year, month, table_num, nof_objects, use_large=use_large, duplicateIt=False)
                     assert 0 == int(output.exit_code), f"Failed to upload flights data for period {1} to table flights_{table_num}_t: {output.output.decode('utf-8')}"
                     hms_loadtest_base.do_trino_repair(table_num)
 
@@ -55,6 +55,11 @@ if __name__ == "__main__":
                 num_tables = int(sys.argv[2])
             if len(sys.argv) > 3:
                 num_objects = int(sys.argv[3])
+            use_large = False
+            if len(sys.argv) > 4:
+                use_large_arg = sys.argv[4].lower()
+                if use_large_arg in ("1", "true", "yes"):
+                    use_large = True
         except ValueError:
             print("Error: Please provide valid integers for the arguments.")
             print("Usage: python hms_loadtest_upload_data.py [end_year] [num_tables] [num_objects]")
@@ -66,4 +71,7 @@ if __name__ == "__main__":
     print(f"  Number of tables: {num_tables}")
     print(f"  Number of objects per table/month: {num_objects}")
     
-    loadtest_upload(end_year, num_tables, num_objects)
+
+    print(f"  Use large files: {use_large}")
+
+    loadtest_upload(end_year, num_tables, num_objects, use_large=use_large)
