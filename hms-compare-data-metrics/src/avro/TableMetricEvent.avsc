@@ -4,12 +4,25 @@
   "namespace": "com.juliusbaer.hms.metrics",
   "fields": [
     {
+      "name": "catalog",
+      "type": "string"
+    },
+    {
+      "name": "schema",
+      "type": "string"
+    },
+    {
       "name": "table_name",
       "type": "string"
     },
     {
       "name": "event_time",
       "type": "long"
+    },
+    {
+      "name": "timestamp_column",
+      "type": ["null", "string"],
+      "default": null
     },
     {
       "name": "value",
