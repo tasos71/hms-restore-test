@@ -12,7 +12,6 @@ from confluent_kafka.serialization import SerializationContext, MessageField
 import argparse
 import logging
 
-
 TRINO_USER = os.getenv('TRINO_DB_USER', 'trino')
 TRINO_PASSWORD = os.getenv('TRINO_DB_PASSWORD', '')
 TRINO_HOST = os.getenv('TRINO_DB_HOST', 'localhost')
@@ -115,7 +114,7 @@ def create_metrics(table_name: str, timestamp_column: Optional[str] = None):
     print (f"Producing count for {TRINO_CATALOG}.{TRINO_SCHEMA}.{table_name}: {count} at {at_timestamp_ms}")
 
     # Create a message
-    message = {
+    metric = {
         'catalog': TRINO_CATALOG,
         'schema': TRINO_SCHEMA,
         'table_name': table_name,
@@ -124,16 +123,24 @@ def create_metrics(table_name: str, timestamp_column: Optional[str] = None):
         'value': count,
         'metric_type': 'count',
     }
-        
+    return metric    
+
+def publish_metric(metric: dict):
+    """
+    Publish table metric to Kafka.
+    
+    Args:
+        metric (dict): A dictionary containing the metric to publish.
+    """
     # Serialize the message using AvroSerializer
-    serialized_message = avro_serializer(message, SerializationContext(KAFKA_TOPIC_NAME, MessageField.VALUE))
+    serialized_message = avro_serializer(metric, SerializationContext(KAFKA_TOPIC_NAME, MessageField.VALUE))
 
     # Produce the message to Kafka
     producer.produce(
             topic=KAFKA_TOPIC_NAME,
             value=serialized_message,
             key=table_name,  # we use the table as the key for the partitioning
-            timestamp=at_timestamp_ms if at_timestamp_ms is not None else execution_timestamp_ms
+            timestamp=metric['event_time']  # use event_time as the timestamp
     )
 
     producer.flush()
@@ -143,9 +150,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Produce metrics for a table to Kafka.")
     parser.add_argument("--table_name", required=True, help="Name of the table to process")
     parser.add_argument("--timestamp_column", required=False, help="Timestamp column name (optional)")
+    parser.add_argument("--publish_to_kafka", type=bool, default=False, help="Publish the metric to Kafka (True/False)")
 
     args = parser.parse_args()
     table_name = args.table_name
     timestamp_column = args.timestamp_column
+    publish_to_kafka = args.publish_to_kafka
 
-    create_metrics(table_name, timestamp_column=timestamp_column)      
+    metric = create_metrics(table_name, timestamp_column=timestamp_column)
+    print (metric)  
+
+    if publish_to_kafka:
+        publish_metric(metric)
+       
