@@ -1,4 +1,5 @@
 pytest
+allure-pytest
 sqlalchemy
 psycopg2-binary
 pytest-html
