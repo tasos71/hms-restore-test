@@ -1,4 +1,5 @@
 pytest
+allure-pytest
 sqlalchemy
 sqlalchemy-trino
 confluent-kafka[avro]

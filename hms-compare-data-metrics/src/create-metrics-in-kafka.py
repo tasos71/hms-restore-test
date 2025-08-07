@@ -112,12 +112,15 @@ def get_count(table, timestamp_column=None):
 def create_metrics(table_name: str, timestamp_column: Optional[str] = None):
     count, execution_timestamp_ms, at_timestamp_ms = get_count(table_name, timestamp_column=timestamp_column)
 
-    print (f"Producing count for {table_name}: {count} at {at_timestamp_ms}")
+    print (f"Producing count for {TRINO_CATALOG}.{TRINO_SCHEMA}.{table_name}: {count} at {at_timestamp_ms}")
 
     # Create a message
     message = {
+        'catalog': TRINO_CATALOG,
+        'schema': TRINO_SCHEMA,
         'table_name': table_name,
         'event_time': at_timestamp_ms if at_timestamp_ms is not None else execution_timestamp_ms,  # use execution_timestamp_ms if at_timestamp_ms is None
+        'timestamp_column': timestamp_column if timestamp_column else None,
         'value': count,
         'metric_type': 'count',
     }
