@@ -336,6 +336,9 @@ services:
       HIVE_SITE_CONF_hive_metastore_transactional_event_listeners: org.apache.hive.hcatalog.listener.KafkaNotificationListener,org.apache.hive.hcatalog.listener.DbNotificationListener
       HIVE_SITE_CONF_hive_metastore_event_db_listener_timetolive: 86400   # 1 day
       HIVE_SITE_CONF_hive_metastore_event_db_listener_clean_interval: 7200  # 2 hours
+      HIVE_SITE_CONF_hive_metastore_event_kafka_listener_bootstrap_servers: kafka-1:19092
+      HIVE_SITE_CONF_hive_metastore_event_kafka_listener_schemaregistry_url: http://schema-registry-1:8081
+      HIVE_SITE_CONF_hive_metastore_event_kafka_listener_topicname: hms.notification.v1
       DB_DRIVER: postgres
       SERVICE_NAME: metastore
       SERVICE_OPTS: -Xmx1G -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://hive-metastore-db/metastore_db -Djavax.jdo.option.ConnectionUserName=hive -Djavax.jdo.option.ConnectionPassword=${PLATYS_HMS_POSTGRESQL_PASSWORD:-abc123!}
@@ -367,6 +370,27 @@ services:
     restart: unless-stopped
     healthcheck:
       test: [CMD, psql, -U, hive, metastore_db]
+  #  ================================== Dataiku Data Science Studio  ========================================== #
+  dataiku-dss:
+    image: dataiku/dss:13.4.1
+    container_name: dataiku-dss
+    hostname: dataiku-dss
+    labels:
+      com.platys.name: dataiku
+      com.platys.description: Platform for Everyday AI
+      com.platys.webui.title: Dataiku DSS UI
+      com.platys.webui.url: http://dataplatform:28315
+    ports:
+      - 28315:10000
+    environment:
+      DUMMY: make-it-valid
+      S3_ENDPOINT_URL: http://minio-1:9000
+      AWS_ACCESS_KEY_ID: ${PLATYS_AWS_ACCESS_KEY:-admin}
+      AWS_SECRET_ACCESS_KEY: ${PLATYS_AWS_SECRET_ACCESS_KEY:-abc123abc123}
+      AWS_DEFAULT_REGION: us-east-1
+    volumes:
+      - ./data-transfer:/data-transfer
+    restart: unless-stopped
   #  ================================== Trino ========================================== #
   trino-1:
     image: trinodb/trino:476
@@ -421,6 +445,7 @@ services:
       - ./conf/trino/kafka/descriptor:/etc/trino/kafka/
       - ./conf/trino/kafka/client.properties:/etc/trino/kafka-configuration.properties
       - ./conf/trino/catalog/hive_metastore_db.properties:/catalog/hive_metastore_db.properties
+      - ./plugins/trino/plugin/trino-udf-476:/usr/lib/trino/plugin/trino-udf-476
       - ./custom-conf/trino/security:/etc/trino/security
     restart: unless-stopped
     healthcheck:

@@ -653,6 +653,7 @@
       HIVE_METASTORE_version: 4.0.1
       HIVE_METASTORE_transactional_event_listener_enabled: true
       HIVE_METASTORE_transactional_event_listeners: 'org.apache.hive.hcatalog.listener.KafkaNotificationListener,org.apache.hive.hcatalog.listener.DbNotificationListener'
+      HIVE_METASTORE_transactional_event_listener_configs: 'event_kafka_listener_bootstrap_servers=kafka-1:19092,event_kafka_listener_schemaregistry_url=http://schema-registry-1:8081,event_kafka_listener_topicname=hms.notification.v1'
       HIVE_METASTORE_plugin_jars: 'hms-kafka-listener-0.1.0.jar'
       HIVE_METASTORE_volume_map_data: false
       # one of 'derby' or 'postgres'
@@ -1460,7 +1461,7 @@
       #
       # ===== Dataiku Data Science Studio ========
       #
-      DATAIKU_DSS_enable: false
+      DATAIKU_DSS_enable: true
       DATAIKU_DSS_volume_map_data: false
       #
       # ===== Drools KIE Server ========
@@ -2306,7 +2307,7 @@
       TRINO_starburstdata_use_license: false
       TRINO_starburstdata_enable_data_product: false
       TRINO_additional_catalogs: ''
-      TRINO_additional_plugins: ''
+      TRINO_additional_plugins: 'trino-udf-476'
       # Trino-CLI is enabled by default
       TRINO_CLI_enable: true
       #

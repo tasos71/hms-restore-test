@@ -13,4 +13,4 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:28304> to see the Spark Master UI.
+Navigate to <http://10.156.72.248:28304> to see the Spark Master UI.

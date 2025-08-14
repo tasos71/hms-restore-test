@@ -13,7 +13,7 @@ platys gen
 
 ## How to use it?
 
-Navigate to <http://dataplatform:xxx>.
+Navigate to <http://10.156.72.248:xxx>.
 
 
 

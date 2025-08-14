@@ -15,4 +15,4 @@ platys gen
 
 ### Web UI
 
-Navigate to <http://dataplatform:28262>.
+Navigate to <http://10.156.72.248:28262>.
