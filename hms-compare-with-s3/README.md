@@ -68,3 +68,5 @@ Run `pytest`
 ```bash
 pytest compare-partitions.py --verbose
 ```
+
+The comparision is driven by the s3 locations in the file.

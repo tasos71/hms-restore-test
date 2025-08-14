@@ -68,5 +68,3 @@ with open(baseline_object_name, "w") as f:
 
 # upload the file to S3 to make it available
 s3.upload_file(baseline_object_name,baseline_bucket, baseline_object_name)
-
-upload_to_kafka(baseline_object_name)

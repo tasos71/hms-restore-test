@@ -15,4 +15,4 @@ RUN pip install --no-cache-dir pytest
 COPY . .
 
 # Set the default command to run tests
-CMD ["pytest", "db-compare.py", "--verbose"]
+CMD ["pytest", "db-compare.py", "--alluredir=/allure-results"]

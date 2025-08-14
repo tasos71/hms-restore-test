@@ -68,6 +68,7 @@ def get_latest_timestamp(db_baseline):
 
 def get_hms_partitions_count_and_partnames(s3_location: str, end_timestamp: int):
     with src_engine.connect() as conn:
+        # TODO: Make end_timestamp optional and configure number of seconds to add
         result = conn.execute(text(f"""
             SELECT t."TBL_NAME", t."TBL_TYPE", p."partition_count", p."part_names"
             FROM (
@@ -75,7 +76,7 @@ def get_hms_partitions_count_and_partnames(s3_location: str, end_timestamp: int)
                     COUNT(*) AS partition_count,
                     string_agg(p."PART_NAME", ',' ORDER BY p."PART_NAME")   part_names
                 FROM public."PARTITIONS" p
-                WHERE p."CREATE_TIME" <= {end_timestamp}                    
+                WHERE p."CREATE_TIME" <= {end_timestamp} + 1                 
                 GROUP BY p."TBL_ID"
             ) p
             JOIN (
