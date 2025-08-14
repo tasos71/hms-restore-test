@@ -1,12 +1,20 @@
 import pytest
 import os
 import time
+import logging
+
 from sqlalchemy import create_engine,text
 from confluent_kafka import Consumer, KafkaError, TopicPartition
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 from confluent_kafka.serialization import SerializationContext, MessageField
-import logging
+
+from typing import Optional
+
+# Environment variables for setting the filter to apply when reading the baseline counts from Kafka. If not set (left to default) then all the tables will consumed and compared against actual counts.
+FILTER_CATALOG = os.getenv('FILTER_CATALOG', None)
+FILTER_SCHEMA = os.getenv('FILTER_SCHEMA', None)
+FILTER_TABLE = os.getenv('FILTER_TABLE', None)
 
 TRINO_USER = os.getenv('TRINO_DB_USER', 'trino')
 TRINO_PASSWORD = os.getenv('TRINO_DB_PASSWORD', '')
@@ -20,9 +28,12 @@ KAFKA_SECURITY_PROTOCOL = os.getenv('KAFKA_SECURITY_PROTOCOL', 'PLAINTEXT')
 KAFKA_SSL_CA_LOCATION = os.getenv('KAFKA_SSL_CA', '/path/to/ca.pem')
 KAFKA_SSL_CERT_LOCATION = os.getenv('KAFKA_SSL_CERT', '/path/to/client_cert.pem')
 KAFKA_SSL_KEY_LOCATION = os.getenv('KAFKA_SSL_KEY', '/path/to/client_key.pem')
-KAFKA_SSL_KEY_PASSWORD = os.getenv('KAFKA_SSL_KEY_PASSWORD', '')  # if your key is password protected
+KAFKA_SSL_KEY_PASSWORD = os.getenv('KAFKA_SSL_KEY_PASSWORD', '<PASSWORD_NOT_SET>')  # if your key is password protected
+KAFKA_SASL_USERNAME = os.getenv('KAFKA_SASL_USERNAME', '<USERNAME_NOT_SET>')
+KAFKA_SASL_PASSWORD = os.getenv('KAFKA_SASL_PASSWORD', '<PASSWORD_NOT_SET>')
 KAFKA_TOPIC_NAME = 'hms.table.metric.events.v1'
 SCHEMA_REGISTRY_URL = os.getenv('SCHEMA_REGISTRY_URL', 'http://localhost:8081')
+SCHEMA_REGISTRY_SSL_CA_LOCATION = os.getenv('SCHEMA_REGISTRY_SSL_CA', '')
 
 # Construct connection URLs
 trino_url = f'trino://{TRINO_USER}:{TRINO_PASSWORD}@{TRINO_HOST}:{TRINO_PORT}/{TRINO_CATALOG}/{TRINO_SCHEMA}'
@@ -31,11 +42,11 @@ trino_url = f'trino://{TRINO_USER}:{TRINO_PASSWORD}@{TRINO_HOST}:{TRINO_PORT}/{T
 trino_engine = create_engine(trino_url)
 
 schema_registry_conf = {
-    'url': SCHEMA_REGISTRY_URL  # change if needed
+    'url': SCHEMA_REGISTRY_URL,
+    'ssl.ca.location': SCHEMA_REGISTRY_SSL_CA_LOCATION
 }
 schema_registry_client = SchemaRegistryClient(schema_registry_conf)
 
-# You can pass schema=None to use the schema from the Schema Registry
 avro_deserializer = AvroDeserializer(schema_registry_client)
 
 # Kafka Consumer config
@@ -52,6 +63,19 @@ consumer_conf_ssl = {
     'ssl.key.password': KAFKA_SSL_KEY_PASSWORD    
 }
 
+consumer_conf_sasl_ssl = {
+    'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
+    'group.id': 'avro-consumer-group',
+    'auto.offset.reset': 'earliest',
+    'enable.auto.commit': True,
+    'enable.partition.eof': True,
+    'security.protocol': 'SASL_SSL',
+    'sasl.mechanism': 'PLAIN',
+    'sasl.username': KAFKA_SASL_USERNAME,
+    'sasl.password': KAFKA_SASL_PASSWORD,
+    'ssl.ca.location': KAFKA_SSL_CA_LOCATION,
+}
+
 consumer_conf_plaintext = {
     'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
     'group.id': 'avro-consumer-group',
@@ -66,13 +90,15 @@ logger = logging.getLogger(__name__)
 def get_baseline(table):
     return latest_values[table]
 
-def get_actual_count(table, timestamp_column=None, baseline_timestamp=None):
+
+def get_actual_count(table: str, timestamp_column: Optional[str] = None, baseline_timestamp: Optional[int] = None) -> int:
     """
     Retrieve the count of rows from a specified table over Trino, optionally filtered by a timestamp column and baseline timestamp.
     Please define the various environment variables for the connection to Trino including the catalog and schema.
 
     Args:
-        table (str): The name of the table to query.
+  
+        table (str): The name of the table to query (as catalog.schema.table_name).
         timestamp_column (str, optional): The name of the timestamp column to filter by. If provided, the count will be filtered where the timestamp column is less than or equal to the baseline timestamp.
         baseline_timestamp (int or float, optional): The baseline timestamp (in Unix time) to use for filtering rows.
 
@@ -82,7 +108,6 @@ def get_actual_count(table, timestamp_column=None, baseline_timestamp=None):
     Raises:
         Exception: If there is an error executing the query.
     """
-
 
     with trino_engine.connect() as conn:
 
@@ -110,13 +135,32 @@ def get_actual_count(table, timestamp_column=None, baseline_timestamp=None):
             count = conn.execute(query).scalar()
     return count
 
-#@pytest.fixture(scope="session", autouse=True)
-def init():
-    latest_values = {}
+def init_actual_values_from_kafka(filter_catalog: Optional[str] = None, filter_schema: Optional[str] = None, filter_table: Optional[str] = None):
+    """
+    Initializes and returns the latest actual values for tables by consuming messages from a Kafka topic.
+    This function reads Avro-serialized messages from a Kafka topic, optionally filtering by catalog, schema, and table name.
+    For each table, only the message with the latest timestamp is retained. The result is a dictionary mapping fully qualified
+    table names to their latest metric values and associated metadata.
+    Args:
+        filter_catalog (str, optional): If provided, only messages with this catalog are processed.
+        filter_schema (str, optional): If provided, only messages with this schema are processed.
+        filter_table (str, optional): If provided, only messages with this table name are processed.
+    Returns:
+        dict: A dictionary where keys are fully qualified table names (catalog.schema.table_name) and values are dictionaries
+              containing the latest timestamp, timestamp_column, value, metric_type, and table_name.
+    Raises:
+        KeyboardInterrupt: If the consumer is interrupted by the user.
+    Side Effects:
+        Prints status and debug information to stdout.
+        Closes the Kafka consumer upon completion.
+    """
+    latest_values: dict[str, dict] = {}
     print ("running init")
     # read from kafka
     if KAFKA_SECURITY_PROTOCOL == 'SSL':
         consumer = Consumer(consumer_conf_ssl)
+    elif KAFKA_SECURITY_PROTOCOL == 'SASL_SSL':
+        consumer = Consumer(consumer_conf_sasl_ssl)
     else:
         consumer = Consumer(consumer_conf_plaintext)
 
@@ -163,7 +207,16 @@ def init():
                 # Deserialize the message using AvroDeserializer
                 value = avro_deserializer(msg.value(), SerializationContext(msg.topic(), MessageField.VALUE))
 
-                key = value.get('table_name')
+                # apply filters it set
+                if filter_catalog and value.get('catalog') != filter_catalog:
+                    continue
+                if filter_schema and value.get('schema') != filter_schema:
+                    continue
+                if filter_table and value.get('table_name') != filter_table:
+                    continue
+
+                # build key of dictionary with the fully qualified table name
+                key = f"{value.get('catalog')}.{value.get('schema')}.{value.get('table_name')}"
                 timestamp = value.get('event_time', 0)  # Assuming event_time is in milliseconds
 
                 # Store only the latest value based on timestamp
@@ -187,10 +240,14 @@ def init():
         print(f"Init completed. Found {len(latest_values)} tables: {list(latest_values.keys())}")
     return latest_values
 
-latest_values = init()
-tables = list(latest_values.keys())
+# all the latest values from Kafka (applying a potential filer set via environment variables)
+latest_values = init_actual_values_from_kafka(FILTER_CATALOG, FILTER_SCHEMA, FILTER_TABLE)
 
-@pytest.mark.parametrize("table", tables)
+# collection of fully qualified table names
+fully_qualified_table_names = list(latest_values.keys())
+
+@pytest.mark.parametrize("fully_qualified_table_name", fully_qualified_table_names)
+def test_value_compare(fully_qualified_table_name):
     """
     Test function to compare the value counts between baseline and actual data for a given table.
 
@@ -205,11 +262,9 @@ tables = list(latest_values.keys())
     Raises:
         AssertionError: If the baseline count does not match the actual count for the given table.
     """
-def test_value_compare(table):
+    baseline_count = get_baseline(fully_qualified_table_name)['value']
+    timestamp_column = get_baseline(fully_qualified_table_name)['timestamp_column']
+    event_time = get_baseline(fully_qualified_table_name)['timestamp']
+    actual_count = get_actual_count(fully_qualified_table_name, timestamp_column=timestamp_column, baseline_timestamp=event_time)
 
-    baseline_count = get_baseline(table)['value']
-    timestamp_column = get_baseline(table)['timestamp_column']
-    event_time = get_baseline(table)['timestamp']
-    actual_count = get_actual_count(table, timestamp_column=timestamp_column, baseline_timestamp=event_time)
-
-    assert baseline_count == actual_count, f"Mismatch in table '{table}': {baseline_count} != {actual_count}"
+    assert baseline_count == actual_count, f"Mismatch in table '{fully_qualified_table_name}': {baseline_count} != {actual_count}"
