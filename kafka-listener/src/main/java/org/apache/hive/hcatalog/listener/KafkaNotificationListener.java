@@ -79,11 +79,24 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
   private Configuration conf;
   private MessageEncoder msgEncoder;
 
-  private static Producer<Long, KafkaNotificationEvent> producer;
+  private static Producer<String, KafkaNotificationEvent> producer;
+  private static String topicName;
+
+  private final static String TOPIC = "hms.notification.v1";
+
+  private static Producer<String, KafkaNotificationEvent> createProducer(Configuration conf) {
+    Properties props = new Properties();
+    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, conf.get("hive.metastore.event.kafka.listener.bootstrap.servers", "localhost:9092"));
+    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
+    props.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, conf.get("hive.metastore.event.kafka.listener.schemaregistry.url", "http://localhost:8081"));   // use constant for "schema.registry.url"
+    return new KafkaProducer<>(props);
+  }
 
   //cleaner is a static object, use static synchronized to make sure its thread-safe
   private static synchronized void init(Configuration conf) throws MetaException {
-    producer = createProducer();
+    producer = createProducer(conf);
+    topicName = conf.get("hive.metastore.event.kafka.listener.topicname",TOPIC);
   }
 
   public KafkaNotificationListener(Configuration config) throws MetaException {
@@ -1284,7 +1297,8 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
   private void process(NotificationEvent event, ListenerEvent listenerEvent) throws MetaException {
     event.setMessageFormat(msgEncoder.getMessageFormat());
 
-    KafkaNotificationEvent ne = KafkaNotificationEvent.newBuilder().setEventId(event.getEventId())
+    KafkaNotificationEvent ne = KafkaNotificationEvent.newBuilder()
+            .setEventId(event.getEventId())
             .setEventTime(event.getEventTime())
             .setEventType(event.getEventType())
             .setDbName(event.getDbName())
@@ -1296,7 +1310,7 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
     LOG.debug("KafkaNotificationListener: Processing : {}:{}", event.getEventId(),
         event.getMessage());
 
-    final ProducerRecord<Long, KafkaNotificationEvent> record = new ProducerRecord<>(TOPIC, 1L, ne);
+    final ProducerRecord<String, KafkaNotificationEvent> record = new ProducerRecord<>(topicName, event.getDbName(), ne);
 
       try {
           RecordMetadata metadata = producer.send(record).get();
@@ -1307,21 +1321,6 @@ public class KafkaNotificationListener extends TransactionalMetaStoreEventListen
       }
   }
 
-  private final static String TOPIC = "hms.notification.v1";
-  private final static String BOOTSTRAP_SERVERS =
-          "kafka-1:19092, kafka-1:19093, kafka-1:19094";
-  private final static String SCHEMA_REGISTRY_URL = "http://schema-registry-1:8081";
 
-  private static Producer<Long, KafkaNotificationEvent> createProducer() {
-    Properties props = new Properties();
-    props.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-    //props.put(ProducerConfig.CLIENT_ID_CONFIG, "KafkaExampleProducer");
-    //props.put(KafkaAvroSerializerConfig.AUTO_REGISTER_SCHEMAS, "false");
-    props.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-    props.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-    props.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, SCHEMA_REGISTRY_URL);   // use constant for "schema.registry.url"
-
-    return new KafkaProducer<>(props);
-  }
 
 }
