@@ -14,16 +14,16 @@ pip install -r requirements.txt
 Set environment variables
 
 ```bash
-export SRC_USER=hive
-export SRC_PASSWORD=abc123!
-export SRC_HOST=localhost
-export SRC_PORT=5442
+export SRC_DB_USER=hive
+export SRC_DB_PASSWORD=abc123!
+export SRC_DB_HOST=localhost
+export SRC_DB_PORT=5442
 export SRC_DB_NAME=metastore_db
 
-export TGT_USER=hive
-export TGT_PASSWORD=abc123!
-export TGT_HOST=localhost
-export TGT_PORT=5442
+export TGT_DB_USER=hive
+export TGT_DB_PASSWORD=abc123!
+export TGT_DB_HOST=localhost
+export TGT_DB_PORT=5442
 export TGT_DB_NAME=metastore_db
 ```
 
