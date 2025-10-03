@@ -26,23 +26,24 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
 
  * Update `milvus` to `v2.5.12` 
  * Update `langflow` to `1.5.0`
- * Update `n8n` to `1.104.0`
- * Update `minio` to `RELEASE.2025-05-24T17-08-30Z`
+ * Update `n8n` to `1.108.1`
+ * Update `minio` to `RELEASE.2025-09-07T16-13-09Z`
  * Update `dgraph` to `v24.1.3`
  * Update `memgraph` to `3.2.1`
  * Update `airflow` to `2.11.0` and `3.0.1`
- * Update `nifi` to `2.4.0`
- * Update `nifi-registry` to `2.4.0`
- * Update `nifi-toolkit` to `2.4.0`
+ * Update `nifi` to `2.5.0`
+ * Update `nifi-registry` to `2.5.0`
+ * Update `nifi-toolkit` to `2.5.0`
  * Update `ollama` to `0.9.0`
  * Update `local-ai` to `v2.29.0`
  * Update `anaconda` to `2024.10-1`
  * Update `grafana` to `12.0.1`
  * Update `memcached` to `1.6`
  * Update `flowise` to `3.0.1`
- * Update `trino` to `476`
- * Update `risingwave` to `v2.4.1`
- * Update `confluent-platform` to `7.9.1`
+ * Update `trino` to `477`
+ * Update `starburstdata` to `476-e.4`
+ * Update `risingwave` to `v2.5.1`
+ * Update `confluent-platform` to `8.0.0`
  * Update `apicurio-registry` to `2.6.11.Final`
  * Update `materialize` to `v0.146.1`
  * Update `arroyo` to `0.14.0`
@@ -72,6 +73,9 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `kong-gateway` to `3.10`
  * Update `s3fs` to `1.95`
  * Update `spring-boot-admin` to `3.4.1`
+ * Update `sqlserver` to `2022-latest`
+ * Update `dremio` to `26.0`
+ * Update `presto` to `0.294`
  
 ### Enhancements
 
@@ -181,7 +185,7 @@ The Modern Data Platform version 1.18.0 contains the following bug fixes and enh
  * Update `mongo` to `8.0` 
  * Update `solr` to `9.5` 
  * Update `janusgraph` to `1.0.0-20231010-065545.e3799d4`
- * Update `neo4j` to `5.26`
+ * Update `neo4j` to `5.26` and `2025`
  * Update `memgraph` to `2.16.0`
  * Update `memgraph-mage` to `1.16-memgraph-2.16-dev`
  * Update `arcadedb` to `24.2.1`
