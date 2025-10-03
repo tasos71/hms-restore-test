@@ -10,7 +10,6 @@
 |[dataiku-dss](./documentation/services/dataiku )|<http://192.168.1.112:28315>|
 |[hive-metastore](./documentation/services/hive-metastore )||
 |[hive-metastore-db](./documentation/services/hive-metastore )||
-|[hive-server](./documentation/services/hive )|<http://192.168.1.112:10002>|
 |[jikkou](./documentation/services/jikkou )||
 |[kafka-1](./documentation/services/kafka )||
 |[kafka-2](./documentation/services/kafka )||
