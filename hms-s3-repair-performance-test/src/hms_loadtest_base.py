@@ -24,6 +24,8 @@ TRINO_SCHEMA = os.getenv('TRINO_SCHEMA', 'flight_db')
 hms_url = f'postgresql://{HMS_USER}:{HMS_PASSWORD}@{HMS_HOST}:{HMS_PORT}/{HMS_DBNAME}'
 trino_url = f'trino://{TRINO_USER}:{TRINO_PASSWORD}@{TRINO_HOST}:{TRINO_PORT}/minio/{TRINO_SCHEMA}'
 
+DATAPLATFORM_HOME = os.getenv('DATAPLATFORM_HOME', '/home/gschmutz/dev/dataplatform')
+
 # Setup connections
 hms_engine = create_engine(hms_url)
 trino_engine = create_engine(trino_url)
@@ -123,9 +125,9 @@ def upload_flights(year, month, table_num, nof):
 
 def upload_flights_with_timestamp_nolongerused(year, month, table_num, nof, use_large=False):
     if use_large:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-large.snappy.parquet'  # large
+        parquet_file = f'{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight-large.snappy.parquet'  # large
     else:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet'  # small
+        parquet_file = f'{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet'  # small
 
     df = pd.read_parquet(parquet_file)
 
@@ -134,7 +136,7 @@ def upload_flights_with_timestamp_nolongerused(year, month, table_num, nof, use_
     index_of_year = df.columns.get_loc('year')
     df.insert(loc=index_of_year, column='eventTimestamp', value=pd.Timestamp.now())
 
-    df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
+    df.to_parquet(f"{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
 
     # Run a temporary container (e.g., alpine echo)
     output = client.containers.get('minio-mc').exec_run(
@@ -145,9 +147,9 @@ def upload_flights_with_timestamp_nolongerused(year, month, table_num, nof, use_
 
 def upload_flights_with_timestamp(year, month, table_num, nof, use_large=False, duplicateIt=False):
     if use_large:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-large.snappy.parquet'  # large
+        parquet_file = f'{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight-large.snappy.parquet'  # large
     else:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet'  # small
+        parquet_file = f'{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet'  # small
 
     df = pd.read_parquet(parquet_file)
 
@@ -161,9 +163,9 @@ def upload_flights_with_timestamp(year, month, table_num, nof, use_large=False, 
         for copy in range(0, 9):
             df_extended = pd.concat([df_extended, df], ignore_index=True)
 
-        df_extended.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
+        df_extended.to_parquet(f"{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
     else:
-        df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
+        df.to_parquet(f"{DATAPLATFORM_HOME}/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
 
     # Run a temporary container (e.g., alpine echo)
     output = client.containers.get('minio-mc').exec_run(

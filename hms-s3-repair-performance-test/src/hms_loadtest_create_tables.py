@@ -31,7 +31,7 @@ client = docker.from_env()
 
 def loadtest_create_bucket():
     hms_loadtest_base.create_bucket("flight-bucket")
-    #hms_loadtest_base.enable_bucket_versioning("flight-bucket")
+    hms_loadtest_base.enable_bucket_versioning("flight-bucket")
 
 def loadtest_create_tables(num_tables=1000):
     # Create schema and tables
@@ -51,15 +51,13 @@ if __name__ == "__main__":
     if len(sys.argv) > 1:
         try:
             num_tables = int(sys.argv[1])
-            print(f"Creating {num_tables} tables...")
         except ValueError:
             print("Error: Please provide a valid integer for the number of tables.")
             print("Usage: python hms_loadtest_create_tables.py [number_of_tables]")
             sys.exit(1)
-    else:
-        print(f"Creating {num_tables} tables (default)...")
 
     loadtest_create_bucket()
 
+    print(f"Creating {num_tables} tables...")
     loadtest_create_tables(num_tables)
 
