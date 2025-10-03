@@ -9,7 +9,6 @@ db-compare/.DS_Store
 /hms-backup-restore/__pycache__
 /hms-backup-restore/src/__pycache__
 /kafka-listener/.idea
-/platys-hms/data-transfer
 /platys-hms/backup
 /platys-hms/performance-test-base
 /platys-hms/container-volume
