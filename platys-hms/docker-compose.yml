@@ -262,48 +262,6 @@ services:
     volumes:
       - ./data-transfer:/data-transfer
     restart: unless-stopped
-  #  ================================== Apache Hive Server ========================================== #
-  hive-server:
-    image: trivadis/apache-hive:4.0.1-postgresql-metastore-s3
-    container_name: hive-server
-    hostname: hive-server
-    labels:
-      com.platys.name: hive
-      com.platys.description: Hive Server
-      com.platys.webui.title: Hive Server UI
-      com.platys.webui.url: http://dataplatform:10002
-    depends_on:
-      hive-metastore:
-        condition: service_healthy
-    ports:
-      - 10000:10000
-      - 10001:10001
-      - 10002:10002
-    environment:
-      SERVICE_PRECONDITION: hive-metastore:9083
-      SERVICE_NAME: hiveserver2
-      SERVICE_OPTS: -Dhive.metastore.uris=thrift://hive-metastore:9083
-      IS_RESUME: 'true'
-      HIVE_SITE_CONF_fs_defaultFS: s3a://admin-bucket
-      HIVE_SITE_CONF_fs_s3a_endpoint: http://minio-1:9000
-      HIVE_SITE_CONF_fs_s3a_access_key: ${PLATYS_AWS_ACCESS_KEY:-admin}
-      HIVE_SITE_CONF_fs_s3a_secret_key: ${PLATYS_AWS_SECRET_ACCESS_KEY:-abc123abc123}
-      HIVE_SITE_CONF_fs_s3a_path_style_access: 'true'
-      HIVE_SITE_CONF_fs_s3a_impl: org.apache.hadoop.fs.s3a.S3AFileSystem
-      HIVE_SITE_CONF_hive_metastore_uris: thrift://hive-metastore:9083
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionURL: jdbc:postgresql://hive-metastore-db/metastore
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionDriverName: org.postgresql.Driver
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionUserName: hive
-      HIVE_SITE_CONF_javax_jdo_option_ConnectionPassword: hive
-      HIVE_SITE_CONF_datanucleus_autoCreateSchema: false
-    volumes:
-      - ./data-transfer:/data-transfer
-    restart: unless-stopped
-    healthcheck:
-      test: [CMD, nc, -z, hive-server, '10000']
-      interval: 30s
-      timeout: 10s
-      retries: 10
   #  ================================== Apache Hive Metastore ========================================== #
   hive-metastore:
     image: trivadis/apache-hive:4.0.1-postgresql-metastore-s3
@@ -396,7 +354,7 @@ services:
     restart: unless-stopped
   #  ================================== Trino ========================================== #
   trino-1:
-    image: trinodb/trino:477
+    image: trinodb/trino:476
     hostname: trino-1
     container_name: trino-1
     labels:
@@ -664,19 +622,6 @@ services:
       - ./artefacts/templates:/scripts
       - .:/variables
       - ./artefacts:/output
-      - ./data-transfer:/data-transfer
-    init: true
-  #  ================================== data-provisioning ========================================== #
-  data-provisioning:
-    image: trivadis/platys-modern-data-platform-data:latest
-    container_name: data-provisioning
-    hostname: data-provisioning
-    labels:
-      com.platys.name: data-provisioning
-      com.platys.description: Provisioning sample data
-    environment:
-      DUMMY: make-it-valid
-    volumes:
       - ./data-transfer:/data-transfer
     init: true
 volumes:

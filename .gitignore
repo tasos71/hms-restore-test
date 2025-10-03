@@ -24,3 +24,4 @@ db-compare/.DS_Store
 /hms-compare-with-s3/venv
 /hms-compare-data-metrics/venv
 **/target/**
+platys-hms/.DS_Store

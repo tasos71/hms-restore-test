@@ -35,7 +35,7 @@
       # ========================================================================
       # Platys Services
       # ========================================================================
-      PROVISIONING_DATA_enable: true
+      PROVISIONING_DATA_enable: false
       PROVISIONING_DATA_additional_data_folder:
       #
       # ===== Platys Modern Data Platform Init ========
@@ -644,8 +644,8 @@
       #
       # ===== Apache Hive ========
       #
-      HIVE_SERVER_enable: true
-      HIVE_SERVER_version: 4.0.1      
+      HIVE_SERVER_enable: false
+      HIVE_SERVER_version: 4.0.1
       #
       # ===== Apache Hive Metastore ========
       #
@@ -2248,6 +2248,7 @@
       # ===== Trino ========
       #
       TRINO_enable: true
+      TRINO_version: 476
       TRINO_custom_image_name: ''
       # "single" or "cluster" install
       TRINO_install: single
@@ -3084,6 +3085,9 @@
           SCHEMA_REGISTRY_url:
           SPARK_enable: false
           SPARK_master_url: 'spark://spark-master:7077'
+          HIVE_METASTORE_enable: false
+          HIVE_METASTORE_host: localhost
+          HIVE_METASTORE_port: 9083          
           S3_enable: false
           S3_endpoint: s3.amazonaws.com
           S3_default_region:
