@@ -116,16 +116,16 @@ def get_count(table):
 def upload_flights(year, month, table_num, nof):
     # Run a temporary container (e.g., alpine echo)
     output = client.containers.get('minio-mc').exec_run(
-        cmd=f"mc cp  /data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
+        cmd=f"mc cp  /data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
     )
 
     return output
 
 def upload_flights_with_timestamp_nolongerused(year, month, table_num, nof, use_large=False):
     if use_large:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/part-00000-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet'  # large
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-large.snappy.parquet'  # large
     else:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet'  # small
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet'  # small
 
     df = pd.read_parquet(parquet_file)
 
@@ -134,20 +134,20 @@ def upload_flights_with_timestamp_nolongerused(year, month, table_num, nof, use_
     index_of_year = df.columns.get_loc('year')
     df.insert(loc=index_of_year, column='eventTimestamp', value=pd.Timestamp.now())
 
-    df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet", index=False)
+    df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
 
     # Run a temporary container (e.g., alpine echo)
     output = client.containers.get('minio-mc').exec_run(
-        cmd=f"mc cp  /data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
+        cmd=f"mc cp  /data-transfer/flight-data/flights-parquet/flight.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
     )
 
     return output
 
 def upload_flights_with_timestamp(year, month, table_num, nof, use_large=False, duplicateIt=False):
     if use_large:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/part-00000-8e3379b7-ffe4-4904-a252-c471bf253208.c000.snappy.parquet'  # large
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-large.snappy.parquet'  # large
     else:
-        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/part-00009-3ca3adb9-4e4b-4d8d-a60f-89a77615c374.c000.snappy.parquet'  # small
+        parquet_file = '/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight-small.snappy.parquet'  # small
 
     df = pd.read_parquet(parquet_file)
 
@@ -161,13 +161,13 @@ def upload_flights_with_timestamp(year, month, table_num, nof, use_large=False, 
         for copy in range(0, 9):
             df_extended = pd.concat([df_extended, df], ignore_index=True)
 
-        df_extended.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet", index=False)
+        df_extended.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
     else:
-        df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet", index=False)
+        df.to_parquet("/Users/guido.schmutz/Documents/GitHub/gschmutz/hms-restore-test/platys-hms/hms-4/data-transfer/flight-data/flights-parquet/flight.snappy.parquet", index=False)
 
     # Run a temporary container (e.g., alpine echo)
     output = client.containers.get('minio-mc').exec_run(
-        cmd=f"mc cp  /data-transfer/flight-data/flights-tiny-parquet/flight.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
+        cmd=f"mc cp  /data-transfer/flight-data/flights-parquet/flight.snappy.parquet minio-1/flight-bucket/refined/flights_{table_num}_t/year={year}/month={month}/{nof}.snappy.parquet",
     )
 
     return output
