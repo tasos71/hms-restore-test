@@ -29,6 +29,10 @@ trino_engine = create_engine(trino_url)
 
 client = docker.from_env()
 
+def loadtest_create_bucket():
+    hms_loadtest_base.create_bucket("flight-bucket")
+    #hms_loadtest_base.enable_bucket_versioning("flight-bucket")
+
 def loadtest_create_tables(num_tables=1000):
     # Create schema and tables
     try:
@@ -54,6 +58,8 @@ if __name__ == "__main__":
             sys.exit(1)
     else:
         print(f"Creating {num_tables} tables (default)...")
-    
+
+    loadtest_create_bucket()
+
     loadtest_create_tables(num_tables)
 

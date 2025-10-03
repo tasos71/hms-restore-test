@@ -1,3 +1,4 @@
+docker
 pytest
 sqlalchemy
 psycopg2-binary
