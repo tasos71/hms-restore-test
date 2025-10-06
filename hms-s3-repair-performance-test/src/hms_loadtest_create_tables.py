@@ -33,20 +33,26 @@ def loadtest_create_bucket():
     hms_loadtest_base.create_bucket("flight-bucket")
     hms_loadtest_base.enable_bucket_versioning("flight-bucket")
 
-def loadtest_create_tables(num_tables=1000):
+def loadtest_create_tables(table_type, num_tables=1000):
     # Create schema and tables
     try:
         hms_loadtest_base.create_schema()
     except Exception as e:
-        print(f"Error creating schema: {e}")
+        if e.name == 'SCHEMA_ALREADY_EXISTS':
+            print("Schema already exists, continuing...")
 
     for table_num in range(0, num_tables):
-        hms_loadtest_base.create_flights_table(table_num)
+        if table_type == 'airports':
+            hms_loadtest_base.create_airports_table(table_num)
+        else:
+            hms_loadtest_base.create_flights_table(table_num)
 
 if __name__ == "__main__":
     # Default number of tables
     num_tables = 1000
     
+    loadtest_create_bucket()
+
     # Check if number of tables is provided as command-line argument
     if len(sys.argv) > 1:
         try:
@@ -56,8 +62,14 @@ if __name__ == "__main__":
             print("Usage: python hms_loadtest_create_tables.py [number_of_tables]")
             sys.exit(1)
 
-    loadtest_create_bucket()
+        table_type = sys.argv[2] if len(sys.argv) > 2 else 'flights'
 
-    print(f"Creating {num_tables} tables...")
-    loadtest_create_tables(num_tables)
+        if table_type not in ['flights', 'airports']:
+            print("Error: Please provide a valid table type ('flights' or 'airports').")
+            print("Usage: python hms_loadtest_create_tables.py [number_of_tables] [table_type]")
+            sys.exit(1)
+
+        print(f"Creating {num_tables} tables of type '{table_type}'...")
+        loadtest_create_tables(table_type, num_tables)
+
 

@@ -75,6 +75,41 @@ def create_schema():
             CREATE SCHEMA minio.flight_db
         """))
 
+def create_airports_table(num):
+    with trino_engine.connect() as conn:
+        conn.execute(text(f"""
+            DROP TABLE IF EXISTS minio.flight_db.airports_{num}_t
+        """))        
+        conn.execute(text(f"""
+            CREATE TABLE minio.flight_db.airports_{num}_t (
+                id               INTEGER,
+                ident            VARCHAR,
+                type          VARCHAR,
+                depTime            INTEGER,
+                crsDepTime         INTEGER,
+                arrTime            INTEGER,
+                crsArrTime         INTEGER,
+                uniqueCarrier      VARCHAR,
+                flightNum          VARCHAR,
+                tailNum            VARCHAR,
+                actualElapsedTime  INTEGER,
+                crsElapsedTime     INTEGER,
+                airTime            INTEGER,
+                arrDelay           INTEGER,
+                depDelay           INTEGER,
+                origin             VARCHAR,
+                destination        VARCHAR,
+                distance           INTEGER,
+                eventTimestamp     TIMESTAMP,
+                year               INTEGER,
+                month              INTEGER
+            )
+            WITH (
+                external_location = 's3a://flight-bucket/refined/airports_{num}_t/',
+                format = 'PARQUET'
+            )
+        """))
+
 def create_flights_table(num):
     with trino_engine.connect() as conn:
         conn.execute(text(f"""
