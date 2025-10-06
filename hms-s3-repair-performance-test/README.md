@@ -17,7 +17,7 @@ docker compose up -d
 
 Set environment variables
 
-````bash
+```bash
 export TRINO_DB_HOST=192.168.1.112
 export S3_ENDPOINT_URL=http://192.168.1.112:9000
 export AWS_ACCESS_KEY=admin
