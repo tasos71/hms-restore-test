@@ -33,6 +33,10 @@ docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 -
 docker exec -ti kafka-1 kafka-topics --create --bootstrap-server kafka-1:19092 --topic hms.notification.v1
 ```
 
+````
+export AWS_ACCESS_KEY=admin
+export AWS_SECRET_ACCESS_KEY=abc123abc123
+
 ## Available Scripts
 
  * `hms_loadtest_base.py` - base functions for all other scripts

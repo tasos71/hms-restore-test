@@ -454,8 +454,6 @@ services:
       MINIO_PROMETHEUS_URL: http://prometheus-1:9090
     volumes:
       - ./data-transfer:/data-transfer
-      - ./container-volume/minio:/data/
-    user: '1000'
     command: server /data --console-address ":9010"
     restart: unless-stopped
     healthcheck:
