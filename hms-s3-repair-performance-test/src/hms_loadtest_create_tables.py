@@ -38,7 +38,7 @@ def loadtest_create_tables(table_type, num_tables=1000):
     try:
         hms_loadtest_base.create_schema()
     except Exception as e:
-        if e.name == 'SCHEMA_ALREADY_EXISTS':
+        if e.args and 'already exists' in str(e.args[0]):
             print("Schema already exists, continuing...")
 
     for table_num in range(0, num_tables):
@@ -55,18 +55,18 @@ if __name__ == "__main__":
 
     # Check if number of tables is provided as command-line argument
     if len(sys.argv) > 1:
-        try:
-            num_tables = int(sys.argv[1])
-        except ValueError:
-            print("Error: Please provide a valid integer for the number of tables.")
-            print("Usage: python hms_loadtest_create_tables.py [number_of_tables]")
-            sys.exit(1)
-
-        table_type = sys.argv[2] if len(sys.argv) > 2 else 'flights'
+        table_type = sys.argv[1] if len(sys.argv) > 2 else 'flights'
 
         if table_type not in ['flights', 'airports']:
             print("Error: Please provide a valid table type ('flights' or 'airports').")
             print("Usage: python hms_loadtest_create_tables.py [number_of_tables] [table_type]")
+            sys.exit(1)
+
+        try:
+            num_tables = int(sys.argv[2])
+        except ValueError:
+            print("Error: Please provide a valid integer for the number of tables.")
+            print("Usage: python hms_loadtest_create_tables.py [number_of_tables]")
             sys.exit(1)
 
         print(f"Creating {num_tables} tables of type '{table_type}'...")

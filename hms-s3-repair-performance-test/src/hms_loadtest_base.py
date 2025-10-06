@@ -36,6 +36,8 @@ client = docker.from_env()
 endpoint_url = os.getenv('S3_ENDPOINT_URL', 'http://localhost:9000')
 bucket = os.getenv('S3_BUCKET', 'flight-bucket')
 prefix = os.getenv('S3_PREFIX', 'refined')  # optionally, specify a prefix
+aws_access_key = os.getenv('AWS_ACCESS_KEY', None)
+aws_secret_access_key = os.getenv('AWS_SECRET_ACCESS_KEY', None)
 
 # Add S3/MinIO client configuration
 def get_s3_client():
@@ -45,7 +47,10 @@ def get_s3_client():
     client_args = {}
     if endpoint_url:
         client_args['endpoint_url'] = endpoint_url
-    
+    if aws_access_key and aws_secret_access_key:
+        client_args["aws_access_key_id"] = aws_access_key
+        client_args["aws_secret_access_key"] = aws_secret_access_key
+
     return boto3.client("s3", **client_args)
 
 s3_client = get_s3_client()
@@ -84,29 +89,26 @@ def create_airports_table(num):
             CREATE TABLE minio.flight_db.airports_{num}_t (
                 id               INTEGER,
                 ident            VARCHAR,
-                type          VARCHAR,
-                depTime            INTEGER,
-                crsDepTime         INTEGER,
-                arrTime            INTEGER,
-                crsArrTime         INTEGER,
-                uniqueCarrier      VARCHAR,
-                flightNum          VARCHAR,
-                tailNum            VARCHAR,
-                actualElapsedTime  INTEGER,
-                crsElapsedTime     INTEGER,
-                airTime            INTEGER,
-                arrDelay           INTEGER,
-                depDelay           INTEGER,
-                origin             VARCHAR,
-                destination        VARCHAR,
-                distance           INTEGER,
-                eventTimestamp     TIMESTAMP,
-                year               INTEGER,
-                month              INTEGER
+                type             VARCHAR,
+                name             VARCHAR,
+                latitude_deg     DOUBLE,
+                longitude_deg    DOUBLE,
+                elevation_ft     INTEGER,
+                continent        VARCHAR,
+                iso_country      VARCHAR,
+                iso_region       VARCHAR,
+                municipality     VARCHAR,
+                scheduled_service VARCHAR,
+                gps_code        VARCHAR,
+                iata_code       VARCHAR,
+                local_code      VARCHAR,
+                home_link       VARCHAR,
+                wikipedia_link  VARCHAR,    
+                keywords        VARCHAR                     
             )
             WITH (
                 external_location = 's3a://flight-bucket/refined/airports_{num}_t/',
-                format = 'PARQUET'
+                format = 'JSON'
             )
         """))
 
@@ -149,6 +151,14 @@ def get_count(table):
     with trino_engine.connect() as conn:
         count = conn.execute(text(f'SELECT COUNT(*) FROM "{table}"')).scalar()
     return count
+
+def upload_airports(table_num):
+    # Run a temporary container (e.g., alpine echo)
+    output = client.containers.get('minio-mc').exec_run(
+        cmd=f"mc cp /data-transfer/airport-data/airports.json minio-1/flight-bucket/refined/airports_{table_num}_t/",
+    )
+
+    return output
 
 def upload_flights(year, month, table_num, nof):
     # Run a temporary container (e.g., alpine echo)
